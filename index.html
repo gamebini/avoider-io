@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avoider.io</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main Menu -->
+    <div class="main-menu" id="mainMenu">
+        <div class="title-container">
+            <h1 class="game-title">AVOIDER.IO</h1>
+            <div class="title-glow"></div>
+        </div>
+        
+        <div class="game-description">
+            <p class="main-desc">빠른 반응으로 복잡한 장애물들을 피하세요!</p>
+            <div class="features">
+                <div class="feature">
+                    <span class="feature-icon">⚡</span>
+                    <span>격자 기반 정확한 컨트롤</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🎯</span>
+                    <span>점점 어려워지는 도전</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🏆</span>
+                    <span>최고 점수 달성하기</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-buttons">
+            <button class="pixel-button main-button" onclick="startGame()">
+                <span class="button-text">START GAME</span>
+                <div class="button-glow"></div>
+            </button>
+        </div>
+        
+        <div class="controls-info">
+            <div class="control-item">
+                <span class="control-key">WASD</span>
+                <span class="control-desc">이동</span>
+            </div>
+            <div class="control-item">
+                <span class="control-key">ESC</span>
+                <span class="control-desc">일시정지</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Container -->
+    <div class="game-container" id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <!-- Game UI -->
+        <div class="game-ui">
+            <div>레벨: <span id="levelDisplay">1</span></div>
+            <div>시간: <span id="timeDisplay">0</span>초</div>
+            <div>난이도: <span id="difficultyDisplay">Easy</span></div>
+            <div>맵 크기: <span id="arenaSizeDisplay">3x1</span></div>
+        </div>
+        
+        <!-- Pause Overlay -->
+        <div class="pause-overlay" id="pauseOverlay">
+            <div class="pause-menu">
+                <h2 class="pause-title">PAUSED</h2>
+                <button class="pixel-button" onclick="resumeGame()">CONTINUE</button>
+                <button class="pixel-button" onclick="goToMainMenu()">MAIN MENU</button>
+            </div>
+        </div>
+        
+        <!-- Game Over Overlay -->
+        <div class="game-over-overlay" id="gameOverOverlay">
+            <div class="game-over-menu">
+                <h2 class="game-over-title">GAME OVER</h2>
+                <div class="final-score-display">
+                    <span id="finalScore">0</span>
+                </div>
+                <div class="stats">
+                    <p>레벨: <span id="finalLevel">1</span></p>
+                    <p>생존 시간: <span id="finalTime">0</span>초</p>
+                </div>
+                <button class="pixel-button" onclick="startGame()">RETRY</button>
+                <button class="pixel-button" onclick="goToMainMenu()">MAIN MENU</button>
+            </div>
+        </div>
+        
+        <!-- Bottom Controls -->
+        <div class="bottom-controls">
+            WASD/방향키: 이동 | ESC: 일시정지
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="sound.js"></script>
+    <script src="arena.js"></script>
+    <script src="effects.js"></script>
+    <script src="obstacle.js"></script>
+    <script src="obstacle_spawner.js"></script>
+    <script src="player.js"></script>
+    <script src="game.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
