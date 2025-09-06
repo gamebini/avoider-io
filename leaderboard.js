@@ -83,11 +83,12 @@ class LeaderboardManager {
         this.gameSessionData = {
             startTime: Date.now(),
             lastLevelTime: Date.now(),
-            lastLevel: 1, // 마지막 레벨 추가
+            lastLevel: 1,
             scoreCheckpoints: [0],
-            validationHash: this.generateValidationHash(0, 1, Date.now())
+            validationHash: this.generateValidationHash(0, 1, Date.now()),
+            levelUpTimes: [] // 레벨업 시간 기록 추가
         };
-        console.log('🎮 게임 세션 시작됨');
+        console.log('🎮 게임 세션 시작 - 완화된 검증 시스템');
     }
 
     // 게임 진행 중 검증 데이터 업데이트
@@ -95,31 +96,53 @@ class LeaderboardManager {
         const now = Date.now();
         const timeSinceStart = now - this.gameSessionData.startTime;
         
-        // 점수 증가율 검증 (완화됨)
+        // 점수 증가율 검증 (게임 로직에 맞게 조정)
         if (this.gameSessionData.scoreCheckpoints.length > 0) {
             const lastScore = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
             const scoreDiff = score - lastScore;
             const timeDiff = timeSinceStart / 1000;
             
-            // 점수 검증을 더 관대하게 (초당 최대 100점으로 상향)
-            if (scoreDiff > timeDiff * 100 && score > 5000) {
-                console.warn('비정상적인 점수 증가 감지');
+            // 레벨에 따른 점수 증가율 고려 (레벨이 높을수록 점수가 빨리 오름)
+            const expectedMaxScorePerSecond = 50 + (level * 10); // 레벨당 추가 10점/초
+            if (scoreDiff > timeDiff * expectedMaxScorePerSecond && score > 10000) {
+                console.warn(`비정상적인 점수 증가: ${scoreDiff}점 in ${timeDiff}초`);
                 return false;
             }
         }
 
-        // 레벨 시간 검증 (완화됨 - 1초로 단축)
-        if (level > 1 && level > this.gameSessionData.lastLevel) {
+        // 레벨 진행 검증 (완전히 새로운 로직)
+        if (level > this.gameSessionData.lastLevel) {
+            // 새로운 레벨에 도달한 경우
+            const levelDiff = level - this.gameSessionData.lastLevel;
             const timeSinceLastLevel = now - this.gameSessionData.lastLevelTime;
-            if (timeSinceLastLevel < 1000) { // 3초 → 1초로 완화
-                console.warn(`레벨 진행이 너무 빠름: ${timeSinceLastLevel}ms`);
+            
+            // 각 레벨은 CONFIG.LEVEL.DURATION(5초)마다 올라가므로
+            const expectedMinTime = (levelDiff * CONFIG.GAMEPLAY.LEVEL_DURATION) * 0.8; // 20% 여유
+            
+            if (timeSinceLastLevel < expectedMinTime && level > 3) {
+                console.warn(`레벨 진행이 너무 빠름: Level ${this.gameSessionData.lastLevel} → ${level} in ${timeSinceLastLevel}ms (최소: ${expectedMinTime}ms)`);
                 return false;
             }
+            
+            // 레벨업 시간 기록
+            this.gameSessionData.levelUpTimes.push({
+                level: level,
+                time: now,
+                gameTime: gameTime
+            });
+            
             this.gameSessionData.lastLevel = level;
             this.gameSessionData.lastLevelTime = now;
+            
+            console.log(`✅ 레벨 ${level} 도달 (게임시간: ${gameTime}초)`);
         }
 
-        this.gameSessionData.scoreCheckpoints.push(score);
+        // 점수 체크포인트 업데이트 (너무 자주 저장하지 않도록)
+        const lastCheckpoint = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
+        if (score - lastCheckpoint >= 100) { // 100점 차이날 때만 저장
+            this.gameSessionData.scoreCheckpoints.push(score);
+        }
+        
         this.gameSessionData.validationHash = this.generateValidationHash(score, level, timeSinceStart);
         
         return true;
@@ -168,42 +191,94 @@ class LeaderboardManager {
 
     // 점수 유효성 검증 (완화됨)
     validateScore(score, level, gameTime) {
-        // 기본 검증
-        if (!Number.isInteger(score) || score < 0 || score > CONFIG.SECURITY.MAX_TOTAL_SCORE) {
-            return { valid: false, reason: '유효하지 않은 점수' };
+        console.log(`🔍 점수 검증 시작: ${score}점, 레벨 ${level}, ${gameTime}초`);
+        
+        // 기본 타입 검증
+        if (!Number.isInteger(score) || score < 0 || score > 10000000) {
+            return { valid: false, reason: '점수 값이 유효하지 않습니다' };
         }
 
-        if (!Number.isInteger(level) || level < 1 || level > CONFIG.SECURITY.MAX_LEVEL) {
-            return { valid: false, reason: '유효하지 않은 레벨' };
+        if (!Number.isInteger(level) || level < 1 || level > 1000) {
+            return { valid: false, reason: '레벨 값이 유효하지 않습니다' };
         }
 
         if (!Number.isInteger(gameTime) || gameTime < 0 || gameTime > 86400) {
-            return { valid: false, reason: '유효하지 않은 게임 시간' };
+            return { valid: false, reason: '게임 시간이 유효하지 않습니다' };
         }
 
+        // 최소 점수 검증
         if (score < this.minValidScore) {
             return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다` };
         }
 
-        // 시간 대비 점수 검증 (완화됨)
-        const maxPossibleScore = gameTime * 100; // 초당 최대 100점으로 상향
-        if (score > maxPossibleScore && score > 10000) { // 임계값도 상향
-            return { valid: false, reason: '시간 대비 점수가 비정상적입니다' };
+        // 레벨과 게임시간의 관계 검증 (완화)
+        const expectedMinTime = (level - 1) * (CONFIG.GAMEPLAY.LEVEL_DURATION / 1000) * 0.7; // 30% 여유
+        if (gameTime < expectedMinTime && level > 5) {
+            console.warn(`시간 부족: Level ${level}에 ${gameTime}초 (최소: ${expectedMinTime}초)`);
+            return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 부족합니다` };
         }
 
-        // 레벨 대비 최소 시간 검증 (완화됨)
-        const minTimeForLevel = Math.max((level - 1) * 3, 0); // 레벨당 최소 3초로 완화
-        if (gameTime < minTimeForLevel && level > 5) { // 5레벨 이상부터만 검증
-            return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 너무 짧습니다` };
+        // 점수와 게임시간의 관계 검증 (레벨 증가에 따른 점수 증가 고려)
+        // 기본 점수: 초당 1점 + 레벨 보너스
+        let expectedMaxScore = 0;
+        for (let i = 1; i <= level; i++) {
+            const levelBonus = Math.floor(i / 2) + 1;
+            const levelDuration = CONFIG.GAMEPLAY.LEVEL_DURATION / 1000; // 5초
+            expectedMaxScore += levelBonus * levelDuration * 50; // 레벨당 50배수로 여유
+        }
+        
+        if (score > expectedMaxScore && score > 20000) {
+            console.warn(`점수 과다: ${score}점 (예상 최대: ${expectedMaxScore}점)`);
+            return { valid: false, reason: '게임 시간 대비 점수가 너무 높습니다' };
         }
 
-        // 게임 세션 검증 (완화됨 - 임시로 비활성화)
-        // const expectedHash = this.generateValidationHash(score, level, gameTime * 1000);
-        // if (this.gameSessionData.validationHash !== expectedHash) {
-        //     return { valid: false, reason: '게임 세션 검증에 실패했습니다' };
-        // }
-
+        console.log('✅ 점수 검증 통과');
         return { valid: true };
+    }
+
+    // 검증 상태 실시간 확인 (디버그용)
+    checkGameProgress(score, level, gameTime) {
+        const now = Date.now();
+        const timeSinceStart = (now - this.gameSessionData.startTime) / 1000;
+        
+        console.group('📊 게임 진행 상태');
+        console.log('현재 점수:', score);
+        console.log('현재 레벨:', level);
+        console.log('게임 시간:', gameTime, '초');
+        console.log('실제 경과 시간:', timeSinceStart.toFixed(1), '초');
+        console.log('마지막 레벨업:', this.gameSessionData.lastLevel);
+        console.log('레벨업 기록:', this.gameSessionData.levelUpTimes);
+        
+        // 현재 점수 증가율 계산
+        const scorePerSecond = score / Math.max(timeSinceStart, 1);
+        console.log('평균 점수 증가율:', scorePerSecond.toFixed(1), '점/초');
+        
+        // 레벨 진행률 계산
+        const expectedLevel = Math.floor(timeSinceStart / (CONFIG.GAMEPLAY.LEVEL_DURATION / 1000)) + 1;
+        console.log('예상 레벨:', expectedLevel, '/ 실제 레벨:', level);
+        
+        console.groupEnd();
+        
+        return {
+            scorePerSecond: scorePerSecond,
+            expectedLevel: expectedLevel,
+            actualLevel: level,
+            timeSinceStart: timeSinceStart
+        };
+    }
+
+    // 관대한 검증 모드 (테스트용)
+    enableLenientMode() {
+        this.lenientMode = true;
+        this.minValidScore = 100; // 최소 점수 하향
+        console.log('🔓 관대한 검증 모드 활성화됨');
+    }
+
+    // 엄격한 검증 모드
+    enableStrictMode() {
+        this.lenientMode = false;
+        this.minValidScore = 500;
+        console.log('🔒 엄격한 검증 모드 활성화됨');
     }
 
     // 디버그용 검증 상태 확인 함수 (새로 추가)
