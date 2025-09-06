@@ -413,20 +413,37 @@ class LeaderboardManager {
 
         this.currentRecord = { score, level, time };
         
+        // 현재 포커스된 요소 저장
+        this.previouslyFocusedElement = document.activeElement;
+        
         document.getElementById('recordScore').textContent = score.toLocaleString();
         document.getElementById('recordLevel').textContent = level;
         document.getElementById('recordTime').textContent = time;
         
         const nameInput = document.getElementById('playerName');
         nameInput.value = '';
-        nameInput.focus();
         
-        document.getElementById('nameInputOverlay').classList.add('show');
-        document.getElementById('nameInputOverlay').setAttribute('aria-hidden', 'false');
+        const overlay = document.getElementById('nameInputOverlay');
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+        
+        // 입력 필드로 포커스 이동
+        setTimeout(() => {
+            nameInput.focus();
+        }, 100);
         
         // Enter 키 이벤트 (한 번만 등록)
         nameInput.removeEventListener('keypress', this.handleEnterKey);
         nameInput.addEventListener('keypress', this.handleEnterKey);
+        
+        // ESC 키로 모달 닫기
+        this.handleEscapeKey = (e) => {
+            if (e.key === 'Escape') {
+                this.skipRecord();
+                document.removeEventListener('keydown', this.handleEscapeKey);
+            }
+        };
+        document.addEventListener('keydown', this.handleEscapeKey);
     }
 
     handleEnterKey = (e) => {
@@ -530,17 +547,45 @@ class LeaderboardManager {
 
     // 새 기록 모달 닫기
     closeNewRecordModal() {
-        document.getElementById('nameInputOverlay').classList.remove('show');
-        document.getElementById('nameInputOverlay').setAttribute('aria-hidden', 'true');
+        const overlay = document.getElementById('nameInputOverlay');
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        
         this.currentRecord = null;
+        
+        // ESC 키 이벤트 제거
+        if (this.handleEscapeKey) {
+            document.removeEventListener('keydown', this.handleEscapeKey);
+            this.handleEscapeKey = null;
+        }
+        
+        // 이전에 포커스되었던 요소로 포커스 복원
+        if (this.previouslyFocusedElement) {
+            this.previouslyFocusedElement.focus();
+            this.previouslyFocusedElement = null;
+        }
     }
 
     // 리더보드 모달 열기 (async로 변경)
     async openLeaderboard() {
         try {
+            // 현재 포커스된 요소 저장
+            this.previouslyFocusedElement = document.activeElement;
+            
             await this.renderLeaderboard();
-            document.getElementById('leaderboardOverlay').classList.add('show');
-            document.getElementById('leaderboardOverlay').setAttribute('aria-hidden', 'false');
+            
+            const overlay = document.getElementById('leaderboardOverlay');
+            overlay.classList.add('show');
+            overlay.setAttribute('aria-hidden', 'false');
+            
+            // 모달 내 첫 번째 포커스 가능한 요소로 포커스 이동
+            setTimeout(() => {
+                const closeButton = overlay.querySelector('.pixel-button');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }, 100);
+            
         } catch (error) {
             console.error('리더보드 로드 오류:', error);
             alert('리더보드를 불러오는 중 오류가 발생했습니다.');
@@ -549,8 +594,15 @@ class LeaderboardManager {
 
     // 리더보드 모달 닫기
     closeLeaderboard() {
-        document.getElementById('leaderboardOverlay').classList.remove('show');
-        document.getElementById('leaderboardOverlay').setAttribute('aria-hidden', 'true');
+        const overlay = document.getElementById('leaderboardOverlay');
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        
+        // 이전에 포커스되었던 요소로 포커스 복원
+        if (this.previouslyFocusedElement) {
+            this.previouslyFocusedElement.focus();
+            this.previouslyFocusedElement = null;
+        }
     }
 
     // 리더보드 내보내기 (웹 전용 기능)

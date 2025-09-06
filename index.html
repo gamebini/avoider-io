@@ -7,9 +7,8 @@
     <meta name="description" content="피하기 게임 - GitHub Pages에서 안전하게 플레이하세요">
     <meta name="robots" content="index, follow">
     
-    <!-- 보안 헤더 -->
+    <!-- 보안 헤더 (X-Frame-Options 제거) -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     
@@ -19,9 +18,10 @@
     <!-- 스타일시트 -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- 개발자 도구 차단을 위한 스크립트 -->
+    <!-- 개발자 모드 스크립트 -->
     <script>
-        let DEVELOPER_MODE = true; // true로 변경하면 개발자 도구 허용
+        // 개발자 모드 설정
+        let DEVELOPER_MODE = false; // true로 변경하면 개발자 도구 허용
 
         // 개발자 모드 토글 함수 (콘솔에서 사용)
         window.toggleDevMode = function() {
@@ -46,7 +46,7 @@
                     (e.ctrlKey && e.key === 'U')) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🚫 개발자 도구가 차단되었습니다. toggleDevMode()를 실행하세요.');
+                    console.log('🚫 개발자 도구가 차단되었습니다. 코나미 코드(↑↑↓↓←→←→)를 입력하세요.');
                     return false;
                 }
             }
@@ -56,7 +56,7 @@
         document.addEventListener('contextmenu', function(e) {
             if (!DEVELOPER_MODE) {
                 e.preventDefault();
-                console.log('🚫 우클릭이 차단되었습니다. toggleDevMode()를 실행하세요.');
+                console.log('🚫 우클릭이 차단되었습니다. 코나미 코드(↑↑↓↓←→←→)를 입력하세요.');
                 return false;
             }
         });
@@ -77,7 +77,7 @@
             }
         });
 
-        // 비밀 명령어로 개발자 모드 활성화
+        // 비밀 명령어로 개발자 모드 활성화 (코나미 코드)
         let secretSequence = [];
         const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
 
@@ -97,7 +97,8 @@
                 console.clear();
                 console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화!');
                 console.log('✨ 코나미 코드: ↑↑↓↓←→←→');
-                window.toggleDevMode();
+                console.log('✅ 이제 우클릭이나 F12로 개발자 도구를 열 수 있습니다!');
+                toggleDevMode();
                 secretSequence = [];
             }
         });
@@ -150,7 +151,7 @@
             </div>
         </div>
         
-        <!-- 리더보드 오버레이 -->
+        <!-- 리더보드 오버레이 (aria-hidden 수정) -->
         <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
             <div class="leaderboard-menu">
                 <h2 id="leaderboardTitle" class="leaderboard-title">LEADERBOARD</h2>
@@ -226,17 +227,16 @@
     <script>
         window.addEventListener('error', function(e) {
             console.error('게임 오류:', e.error);
-            // 필요시 에러 로깅 서비스로 전송
         });
         
         window.addEventListener('unhandledrejection', function(e) {
             console.error('처리되지 않은 Promise 거부:', e.reason);
-            // 필요시 에러 로깅 서비스로 전송
         });
         
         // 게임 로드 완료 체크
         window.addEventListener('load', function() {
             console.log('Avoider.io 게임이 성공적으로 로드되었습니다.');
+            console.log('🎮 개발자 모드: 코나미 코드(↑↑↓↓←→←→)로 활성화');
             
             // 사운드 초기화를 위한 첫 번째 클릭 이벤트
             document.addEventListener('click', function initAudio() {
@@ -262,7 +262,7 @@
                     warning.style.display = 'block';
                     setTimeout(() => {
                         warning.style.display = 'none';
-                    }, 5000); // 5초 후 숨김
+                    }, 5000);
                 }
             };
             
@@ -280,11 +280,10 @@
             updateNetworkStatus();
         });
         
-        // 페이지 가시성 변경 감지 (탭 전환 등)
+        // 페이지 가시성 변경 감지
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 console.log('페이지가 백그라운드로 이동');
-                // 게임이 실행 중이면 자동 일시정지 (game.js에서 처리)
             } else {
                 console.log('페이지가 포그라운드로 복귀');
             }
