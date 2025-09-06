@@ -21,34 +21,85 @@
     
     <!-- 개발자 도구 차단을 위한 스크립트 -->
     <script>
-        // 기본적인 개발자 도구 차단
+        let DEVELOPER_MODE = false; // true로 변경하면 개발자 도구 허용
+
+        // 개발자 모드 토글 함수 (콘솔에서 사용)
+        window.toggleDevMode = function() {
+            DEVELOPER_MODE = !DEVELOPER_MODE;
+            console.log('🔧 개발자 모드:', DEVELOPER_MODE ? 'ON' : 'OFF');
+            if (DEVELOPER_MODE) {
+                console.log('✅ 개발자 도구가 허용되었습니다.');
+                console.log('💡 사용 가능한 명령어:');
+                console.log('   - debugLeaderboard() : 리더보드 디버그');
+                console.log('   - exportLeaderboard() : 리더보드 내보내기');
+                console.log('   - resetLeaderboard() : 리더보드 초기화');
+                console.log('   - toggleDevMode() : 개발자 모드 끄기');
+            }
+        };
+
+        // 개발자 도구 차단 (개발자 모드가 꺼져있을 때만)
         document.addEventListener('keydown', function(e) {
-            // F12, Ctrl+Shift+I/J/C, Ctrl+U 차단
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
-                (e.ctrlKey && e.key === 'U')) {
+            if (!DEVELOPER_MODE) {
+                // F12, Ctrl+Shift+I/J/C, Ctrl+U 차단
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🚫 개발자 도구가 차단되었습니다. toggleDevMode()를 실행하세요.');
+                    return false;
+                }
+            }
+        });
+
+        // 우클릭 차단 (개발자 모드가 꺼져있을 때만)
+        document.addEventListener('contextmenu', function(e) {
+            if (!DEVELOPER_MODE) {
                 e.preventDefault();
-                e.stopPropagation();
+                console.log('🚫 우클릭이 차단되었습니다. toggleDevMode()를 실행하세요.');
                 return false;
             }
         });
-        
-        // 우클릭 차단
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
+
         // 드래그 차단
         document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-            return false;
+            if (!DEVELOPER_MODE) {
+                e.preventDefault();
+                return false;
+            }
         });
-        
+
         // 선택 차단
         document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-            return false;
+            if (!DEVELOPER_MODE) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // 비밀 명령어로 개발자 모드 활성화
+        let secretSequence = [];
+        const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
+
+        document.addEventListener('keydown', function(e) {
+            secretSequence.push(e.code);
+            
+            // 시퀀스가 너무 길면 앞부분 제거
+            if (secretSequence.length > SECRET_CODE.length) {
+                secretSequence.shift();
+            }
+            
+            // 비밀 코드 확인 (코나미 코드)
+            if (secretSequence.length === SECRET_CODE.length && 
+                secretSequence.every((key, index) => key === SECRET_CODE[index])) {
+                
+                DEVELOPER_MODE = true;
+                console.clear();
+                console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화!');
+                console.log('✨ 코나미 코드: ↑↑↓↓←→←→');
+                window.toggleDevMode();
+                secretSequence = [];
+            }
         });
     </script>
 </head>

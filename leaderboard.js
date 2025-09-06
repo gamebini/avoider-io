@@ -6,7 +6,7 @@ class LeaderboardManager {
         this.currentRecord = null;
         
         // GitHub API 설정 (선택사항 - 웹 전용이므로 주로 로컬 저장소 사용)
-        this.apiEndpoint = 'https://api.github.com/repos/YOUR_USERNAME/avoider-io-data/contents/leaderboard.json';
+        this.apiEndpoint = 'https://api.github.com/repos/gamebini/avoider-io-data/contents/leaderboard.json';
         this.github_token = null; // GitHub Personal Access Token (없어도 됨)
         
         // 보안 및 검증 설정
