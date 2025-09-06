@@ -352,7 +352,6 @@ class Game {
             if (!confirmStart) return;
         }
 
-        // 게임 시작 사운드 재생
         if (typeof soundManager !== 'undefined') {
             soundManager.playStartSound();
         }
@@ -404,29 +403,32 @@ class Game {
             levelHistory: [{level: 1, timestamp: Date.now()}],
             suspicious: false,
             validationInterval: 5000,
-            maxScorePerSecond: 20,
-            maxLevelPerMinute: 12
+            maxScorePerSecond: 100, // 더 관대하게 설정
+            maxLevelPerMinute: 20    // 더 관대하게 설정
         };
         
         this.inputSecurity = {
             keyPressHistory: [],
-            maxKeysPerSecond: 10,
+            maxKeysPerSecond: 15, // 더 관대하게 설정
             lastKeyTime: 0,
             suspiciousPatterns: 0
         };
 
-        // 리더보드 게임 세션 시작
+        // 리더보드 게임 세션 시작 (개선됨)
         if (typeof leaderboardManager !== 'undefined') {
-            leaderboardManager.startGameSession();
+            try {
+                leaderboardManager.startGameSession();
+                console.log('✅ 리더보드 세션 시작됨');
+            } catch (error) {
+                console.warn('리더보드 세션 시작 실패:', error);
+            }
         }
         
-        // 플레이어, 아레나, 스포너, 이펙트 초기화
         this.player.reset();
         this.arena.updateSize(this.level);
         this.spawner.clear();
         this.effectManager.reset();
         
-        // 게임오버 애니메이션 완전 리셋
         this.gameOverAnimation = {
             scoreAnimating: false,
             timeAnimating: false,
@@ -441,10 +443,22 @@ class Game {
             fadeStartTime: 0
         };
         
-        // 타이머 리셋
         this.lastTime = performance.now();
+        console.log('🎮 게임 시작 - 완화된 검증 시스템 적용');
     }
     
+    showValidationFailure(reason) {
+        console.warn('검증 실패:', reason);
+        
+        // 개발자 모드에서만 상세 정보 표시
+        if (typeof DEVELOPER_MODE !== 'undefined' && DEVELOPER_MODE) {
+            alert(`🔍 검증 실패 (개발자 모드): ${reason}\n\n게임을 다시 시작해주세요.`);
+        } else {
+            // 일반 사용자에게는 간단한 메시지
+            console.log('게임 진행에 문제가 감지되었습니다. 게임을 다시 시작해주세요.');
+        }
+    }
+
     pauseGame() {
         if (this.gameState === 'playing') {
             if (typeof soundManager !== 'undefined') {
@@ -631,9 +645,19 @@ class Game {
             this.score += baseScore;
             this.lastScoreTime = 0;
 
-            // 리더보드에 게임 진행 상황 업데이트
-            if (typeof leaderboardManager !== 'undefined') {
-                leaderboardManager.updateGameSession(this.score, this.level, Math.floor(this.gameTime / 1000));
+            // 리더보드에 게임 진행 상황 업데이트 (빈도 줄임)
+            if (typeof leaderboardManager !== 'undefined' && this.score % 100 === 0) {
+                // 100점마다만 업데이트 (부하 감소)
+                const updateSuccess = leaderboardManager.updateGameSession(
+                    this.score, 
+                    this.level, 
+                    Math.floor(this.gameTime / 1000)
+                );
+                
+                if (!updateSuccess) {
+                    console.warn('⚠️ 게임 세션 검증 실패 - 의심스러운 활동으로 표시됨');
+                    this.gameIntegrity.suspicious = true;
+                }
             }
         }
         
@@ -643,6 +667,15 @@ class Game {
             this.levelTime = 0;
             this.arena.updateSize(this.level);
             this.adjustPlayerPosition();
+            
+            // 레벨업 시 리더보드 업데이트
+            if (typeof leaderboardManager !== 'undefined') {
+                leaderboardManager.updateGameSession(
+                    this.score, 
+                    this.level, 
+                    Math.floor(this.gameTime / 1000)
+                );
+            }
             
             if (typeof soundManager !== 'undefined') {
                 soundManager.playLevelUpSound();

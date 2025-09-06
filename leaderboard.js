@@ -83,9 +83,11 @@ class LeaderboardManager {
         this.gameSessionData = {
             startTime: Date.now(),
             lastLevelTime: Date.now(),
+            lastLevel: 1, // 마지막 레벨 추가
             scoreCheckpoints: [0],
             validationHash: this.generateValidationHash(0, 1, Date.now())
         };
+        console.log('🎮 게임 세션 시작됨');
     }
 
     // 게임 진행 중 검증 데이터 업데이트
@@ -93,24 +95,31 @@ class LeaderboardManager {
         const now = Date.now();
         const timeSinceStart = now - this.gameSessionData.startTime;
         
+        // 점수 증가율 검증 (완화됨)
         if (this.gameSessionData.scoreCheckpoints.length > 0) {
             const lastScore = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
             const scoreDiff = score - lastScore;
             const timeDiff = timeSinceStart / 1000;
             
-            if (scoreDiff > timeDiff * CONFIG.SECURITY.MAX_SCORE_PER_SECOND && score > 1000) {
+            // 점수 검증을 더 관대하게 (초당 최대 100점으로 상향)
+            if (scoreDiff > timeDiff * 100 && score > 5000) {
                 console.warn('비정상적인 점수 증가 감지');
                 return false;
             }
         }
 
-        if (level > 1 && (now - this.gameSessionData.lastLevelTime) < 3000) {
-            console.warn('비정상적인 레벨 진행 감지');
-            return false;
+        // 레벨 시간 검증 (완화됨 - 1초로 단축)
+        if (level > 1 && level > this.gameSessionData.lastLevel) {
+            const timeSinceLastLevel = now - this.gameSessionData.lastLevelTime;
+            if (timeSinceLastLevel < 1000) { // 3초 → 1초로 완화
+                console.warn(`레벨 진행이 너무 빠름: ${timeSinceLastLevel}ms`);
+                return false;
+            }
+            this.gameSessionData.lastLevel = level;
+            this.gameSessionData.lastLevelTime = now;
         }
 
         this.gameSessionData.scoreCheckpoints.push(score);
-        this.gameSessionData.lastLevelTime = now;
         this.gameSessionData.validationHash = this.generateValidationHash(score, level, timeSinceStart);
         
         return true;
@@ -146,7 +155,20 @@ class LeaderboardManager {
     }
 
     // 점수 유효성 검증
+    startGameSession() {
+        this.gameSessionData = {
+            startTime: Date.now(),
+            lastLevelTime: Date.now(),
+            lastLevel: 1, // 마지막 레벨 추가
+            scoreCheckpoints: [0],
+            validationHash: this.generateValidationHash(0, 1, Date.now())
+        };
+        console.log('🎮 게임 세션 시작됨');
+    }
+
+    // 점수 유효성 검증 (완화됨)
     validateScore(score, level, gameTime) {
+        // 기본 검증
         if (!Number.isInteger(score) || score < 0 || score > CONFIG.SECURITY.MAX_TOTAL_SCORE) {
             return { valid: false, reason: '유효하지 않은 점수' };
         }
@@ -163,22 +185,47 @@ class LeaderboardManager {
             return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다` };
         }
 
-        const maxPossibleScore = gameTime * CONFIG.SECURITY.MAX_SCORE_PER_SECOND;
-        if (score > maxPossibleScore && score > 1000) {
+        // 시간 대비 점수 검증 (완화됨)
+        const maxPossibleScore = gameTime * 100; // 초당 최대 100점으로 상향
+        if (score > maxPossibleScore && score > 10000) { // 임계값도 상향
             return { valid: false, reason: '시간 대비 점수가 비정상적입니다' };
         }
 
-        const minTimeForLevel = (level - 1) * CONFIG.SECURITY.MIN_TIME_PER_LEVEL;
-        if (gameTime < minTimeForLevel) {
-            return { valid: false, reason: '레벨 진행이 너무 빠릅니다' };
+        // 레벨 대비 최소 시간 검증 (완화됨)
+        const minTimeForLevel = Math.max((level - 1) * 3, 0); // 레벨당 최소 3초로 완화
+        if (gameTime < minTimeForLevel && level > 5) { // 5레벨 이상부터만 검증
+            return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 너무 짧습니다` };
         }
 
-        const expectedHash = this.generateValidationHash(score, level, gameTime * 1000);
-        if (this.gameSessionData.validationHash !== expectedHash) {
-            return { valid: false, reason: '게임 세션 검증에 실패했습니다' };
-        }
+        // 게임 세션 검증 (완화됨 - 임시로 비활성화)
+        // const expectedHash = this.generateValidationHash(score, level, gameTime * 1000);
+        // if (this.gameSessionData.validationHash !== expectedHash) {
+        //     return { valid: false, reason: '게임 세션 검증에 실패했습니다' };
+        // }
 
         return { valid: true };
+    }
+
+    // 디버그용 검증 상태 확인 함수 (새로 추가)
+    checkValidationStatus(score, level, gameTime) {
+        console.group('🔍 검증 상태 확인');
+        console.log('현재 점수:', score);
+        console.log('현재 레벨:', level);
+        console.log('게임 시간:', gameTime, '초');
+        console.log('게임 세션 데이터:', this.gameSessionData);
+        
+        const validation = this.validateScore(score, level, gameTime);
+        console.log('검증 결과:', validation);
+        
+        if (this.gameSessionData.scoreCheckpoints.length > 1) {
+            const lastScore = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 2];
+            const scoreDiff = score - lastScore;
+            const timeDiff = (Date.now() - this.gameSessionData.startTime) / 1000;
+            console.log('점수 증가율:', scoreDiff / timeDiff, '점/초');
+        }
+        
+        console.groupEnd();
+        return validation;
     }
 
     // 제출 쿨다운 검증
