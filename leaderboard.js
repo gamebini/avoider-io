@@ -1,19 +1,15 @@
-// ===== LEADERBOARD.JS - 웹 전용 보안 강화된 리더보드 시스템 =====
+// ===== LEADERBOARD.JS - 실제 리더보드 시스템 =====
 class LeaderboardManager {
     constructor() {
         this.storageKey = 'avoider_leaderboard_v2';
         this.maxEntries = 10;
         this.currentRecord = null;
         
-        // GitHub API 설정 (선택사항 - 웹 전용이므로 주로 로컬 저장소 사용)
-        this.apiEndpoint = 'https://api.github.com/repos/gamebini/avoider-io-data/contents/leaderboard.json';
-        this.github_token = null; // GitHub Personal Access Token (없어도 됨)
-        
         // 보안 및 검증 설정
         this.lastSubmissionTime = 0;
         this.submissionCooldown = 30000; // 30초 쿨다운
         this.maxNameLength = 15;
-        this.minValidScore = 100; // 최소 유효 점수
+        this.minValidScore = 500; // 최소 유효 점수 (더미 데이터보다 낮게)
         this.encryptionKey = this.generateEncryptionKey();
         
         // 해킹 방지를 위한 게임 세션 추적
@@ -24,20 +20,42 @@ class LeaderboardManager {
             validationHash: null
         };
         
-        // 웹 전용 설정
-        this.webOnlyMode = true;
-        this.syncAttempts = 0;
-        this.maxSyncAttempts = 3;
+        // 실제 리더보드 초기화 (더미 데이터 제거)
+        this.initializeRealLeaderboard();
     }
 
-    // 암호화 키 생성 (브라우저 세션별 고유)
+    // 실제 리더보드 초기화 (더미 데이터 대신 빈 리더보드)
+    initializeRealLeaderboard() {
+        const existingData = this.loadLocalLeaderboard();
+        
+        // 기존 데이터가 더미 데이터인지 확인
+        if (this.isDummyData(existingData)) {
+            console.log('🗑️ 더미 데이터 감지됨. 실제 리더보드로 초기화합니다.');
+            localStorage.removeItem(this.storageKey);
+        }
+    }
+
+    // 더미 데이터 여부 확인
+    isDummyData(leaderboard) {
+        if (!Array.isArray(leaderboard) || leaderboard.length === 0) return false;
+        
+        const dummyNames = ['SYSTEM', 'ADMIN', 'PLAYER', 'GUEST', 'USER'];
+        const dummyCount = leaderboard.filter(entry => 
+            dummyNames.includes(entry.name) && entry.verified === true
+        ).length;
+        
+        // 더미 데이터가 3개 이상이면 더미 데이터로 판단
+        return dummyCount >= 3;
+    }
+
+    // 암호화 키 생성
     generateEncryptionKey() {
         const browserFingerprint = this.getBrowserFingerprint();
         const sessionId = Date.now().toString(36) + Math.random().toString(36);
         return btoa(browserFingerprint + sessionId).substring(0, 32);
     }
 
-    // 브라우저 핑거프린팅 (기본적인 수준)
+    // 브라우저 핑거프린팅
     getBrowserFingerprint() {
         try {
             const canvas = document.createElement('canvas');
@@ -60,7 +78,7 @@ class LeaderboardManager {
         }
     }
 
-    // 게임 세션 시작 시 호출
+    // 게임 세션 시작
     startGameSession() {
         this.gameSessionData = {
             startTime: Date.now(),
@@ -75,20 +93,17 @@ class LeaderboardManager {
         const now = Date.now();
         const timeSinceStart = now - this.gameSessionData.startTime;
         
-        // 비정상적인 점수 증가 감지
         if (this.gameSessionData.scoreCheckpoints.length > 0) {
             const lastScore = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
             const scoreDiff = score - lastScore;
-            const timeDiff = timeSinceStart / 1000; // 초 단위
+            const timeDiff = timeSinceStart / 1000;
             
-            // 점수 증가율 검증 (초당 최대 50점 정도로 제한)
             if (scoreDiff > timeDiff * CONFIG.SECURITY.MAX_SCORE_PER_SECOND && score > 1000) {
                 console.warn('비정상적인 점수 증가 감지');
                 return false;
             }
         }
 
-        // 레벨 시간 검증 (최소 3초는 걸려야 함)
         if (level > 1 && (now - this.gameSessionData.lastLevelTime) < 3000) {
             console.warn('비정상적인 레벨 진행 감지');
             return false;
@@ -113,7 +128,7 @@ class LeaderboardManager {
         for (let i = 0; i < str.length; i++) {
             const char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // 32비트 정수로 변환
+            hash = hash & hash;
         }
         return Math.abs(hash).toString(36);
     }
@@ -126,13 +141,12 @@ class LeaderboardManager {
             .trim()
             .substring(0, this.maxNameLength)
             .replace(/[<>\"'&]/g, '') // XSS 방지
-            .replace(/[^\w\s가-힣]/g, '') // 특수문자 제거
+            .replace(/[^\w\s가-힣ㄱ-ㅎㅏ-ㅣ]/g, '') // 한글, 영문, 숫자만 허용
             .toUpperCase();
     }
 
     // 점수 유효성 검증
     validateScore(score, level, gameTime) {
-        // 기본 검증
         if (!Number.isInteger(score) || score < 0 || score > CONFIG.SECURITY.MAX_TOTAL_SCORE) {
             return { valid: false, reason: '유효하지 않은 점수' };
         }
@@ -145,27 +159,23 @@ class LeaderboardManager {
             return { valid: false, reason: '유효하지 않은 게임 시간' };
         }
 
-        // 최소 점수 검증
         if (score < this.minValidScore) {
-            return { valid: false, reason: '점수가 너무 낮음' };
+            return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다` };
         }
 
-        // 시간 대비 점수 검증 (대략적인 상한선)
         const maxPossibleScore = gameTime * CONFIG.SECURITY.MAX_SCORE_PER_SECOND;
         if (score > maxPossibleScore && score > 1000) {
-            return { valid: false, reason: '시간 대비 점수가 비정상적' };
+            return { valid: false, reason: '시간 대비 점수가 비정상적입니다' };
         }
 
-        // 레벨 대비 최소 시간 검증
         const minTimeForLevel = (level - 1) * CONFIG.SECURITY.MIN_TIME_PER_LEVEL;
         if (gameTime < minTimeForLevel) {
-            return { valid: false, reason: '레벨 진행이 너무 빠름' };
+            return { valid: false, reason: '레벨 진행이 너무 빠릅니다' };
         }
 
-        // 게임 세션 검증
         const expectedHash = this.generateValidationHash(score, level, gameTime * 1000);
         if (this.gameSessionData.validationHash !== expectedHash) {
-            return { valid: false, reason: '게임 세션 검증 실패' };
+            return { valid: false, reason: '게임 세션 검증에 실패했습니다' };
         }
 
         return { valid: true };
@@ -189,22 +199,22 @@ class LeaderboardManager {
         try {
             const data = localStorage.getItem(this.storageKey);
             if (data) {
-                return this.validateLeaderboardData(JSON.parse(data));
+                const parsed = JSON.parse(data);
+                return this.validateLeaderboardData(parsed);
             }
         } catch (error) {
             console.warn('로컬 리더보드 로드 실패:', error);
         }
-        return this.getDefaultLeaderboard();
+        return []; // 빈 배열 반환 (더미 데이터 없음)
     }
 
     // 로컬 리더보드 저장
     saveLocalLeaderboard(leaderboard) {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(leaderboard));
-            console.log('로컬 리더보드 저장 완료');
+            console.log('✅ 리더보드 저장 완료:', leaderboard.length, '개 기록');
         } catch (error) {
             console.error('로컬 리더보드 저장 실패:', error);
-            // 저장 공간이 부족한 경우 오래된 데이터 정리
             this.cleanupLocalStorage();
         }
     }
@@ -212,7 +222,6 @@ class LeaderboardManager {
     // 로컬 저장소 정리
     cleanupLocalStorage() {
         try {
-            // 오래된 버전의 리더보드 데이터 삭제
             const oldKeys = ['avoider_leaderboard', 'avoider_leaderboard_v1'];
             oldKeys.forEach(key => {
                 if (localStorage.getItem(key)) {
@@ -221,8 +230,7 @@ class LeaderboardManager {
                 }
             });
             
-            // 다시 저장 시도
-            const defaultData = this.getDefaultLeaderboard();
+            const defaultData = [];
             localStorage.setItem(this.storageKey, JSON.stringify(defaultData));
         } catch (error) {
             console.error('로컬 저장소 정리 실패:', error);
@@ -232,7 +240,7 @@ class LeaderboardManager {
 
     // 리더보드 데이터 검증
     validateLeaderboardData(data) {
-        if (!Array.isArray(data)) return this.getDefaultLeaderboard();
+        if (!Array.isArray(data)) return [];
         
         return data
             .filter(entry => {
@@ -248,25 +256,14 @@ class LeaderboardManager {
             .slice(0, this.maxEntries);
     }
 
-    // 기본 리더보드 데이터
-    getDefaultLeaderboard() {
-        return [
-            { name: "SYSTEM", score: 5000, level: 10, time: 120, date: new Date().toLocaleDateString(), verified: true },
-            { name: "ADMIN", score: 3500, level: 8, time: 85, date: new Date().toLocaleDateString(), verified: true },
-            { name: "PLAYER", score: 2500, level: 6, time: 60, date: new Date().toLocaleDateString(), verified: true },
-            { name: "GUEST", score: 1500, level: 4, time: 35, date: new Date().toLocaleDateString(), verified: true },
-            { name: "USER", score: 1000, level: 3, time: 25, date: new Date().toLocaleDateString(), verified: true }
-        ];
-    }
-
-    // 리더보드 로드 (웹 전용 - 로컬 우선)
+    // 리더보드 로드
     async loadLeaderboard() {
         return this.loadLocalLeaderboard();
     }
 
     // 점수가 리더보드에 등록 가능한지 확인
     async isNewRecord(score) {
-        const validation = this.validateScore(score, 1, 1); // 기본 검증
+        const validation = this.validateScore(score, 1, 1);
         if (!validation.valid) {
             console.warn('점수 검증 실패:', validation.reason);
             return false;
@@ -274,6 +271,7 @@ class LeaderboardManager {
 
         const leaderboard = await this.loadLeaderboard();
         
+        // 리더보드가 10개 미만이거나, 최저 점수보다 높으면 신기록
         if (leaderboard.length < this.maxEntries) {
             return true;
         }
@@ -282,22 +280,19 @@ class LeaderboardManager {
         return score > lowestScore;
     }
 
-    // 새 기록 추가 (웹 전용)
+    // 새 기록 추가
     async addRecord(name, score, level, time) {
-        // 쿨다운 검증
         const cooldownCheck = this.canSubmitScore();
         if (!cooldownCheck.canSubmit) {
             alert(cooldownCheck.reason);
             return null;
         }
 
-        // 입력 검증
         const sanitizedName = this.sanitizeInput(name) || "ANONYMOUS";
         
-        // 점수 유효성 검증
         const validation = this.validateScore(score, level, time);
         if (!validation.valid) {
-            alert(`점수 검증 실패: ${validation.reason}`);
+            alert(`❌ 기록 등록 실패: ${validation.reason}`);
             return null;
         }
 
@@ -305,19 +300,18 @@ class LeaderboardManager {
 
         const newRecord = {
             name: sanitizedName,
-            score: Math.floor(score), // 정수로 변환
+            score: Math.floor(score),
             level: Math.floor(level),
             time: Math.floor(time),
             date: new Date().toLocaleDateString(),
             timestamp: Date.now(),
-            verified: false, // 사용자 제출 기록은 미검증으로 표시
-            sessionId: this.encryptionKey.substring(0, 8) // 세션 식별용
+            verified: false,
+            sessionId: this.encryptionKey.substring(0, 8)
         };
 
         try {
             const leaderboard = await this.loadLeaderboard();
             
-            // 기록 추가 및 정렬
             leaderboard.push(newRecord);
             leaderboard.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
@@ -325,13 +319,11 @@ class LeaderboardManager {
                 return b.time - a.time;
             });
 
-            // 상위 10개만 유지
             leaderboard.splice(this.maxEntries);
 
-            // 로컬에 저장
             this.saveLocalLeaderboard(leaderboard);
 
-            console.log('새 기록 추가 완료:', newRecord);
+            console.log('🎉 새 기록 등록:', newRecord);
             return leaderboard;
         } catch (error) {
             console.error('기록 추가 실패:', error);
@@ -340,7 +332,7 @@ class LeaderboardManager {
         }
     }
 
-    // UI 렌더링 (검증 상태 표시 추가)
+    // UI 렌더링
     async renderLeaderboard() {
         const leaderboard = await this.loadLeaderboard();
         const listElement = document.getElementById('leaderboardList');
@@ -348,6 +340,21 @@ class LeaderboardManager {
         if (!listElement) return;
         
         listElement.innerHTML = '';
+        
+        // 빈 리더보드 메시지
+        if (leaderboard.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'empty-leaderboard-message';
+            emptyMessage.innerHTML = `
+                <div style="text-align: center; padding: 40px; opacity: 0.7;">
+                    <h3>🏆 아직 기록이 없습니다!</h3>
+                    <p>첫 번째 기록의 주인공이 되어보세요!</p>
+                    <p>최소 ${this.minValidScore}점 이상 달성하면 리더보드에 등록됩니다.</p>
+                </div>
+            `;
+            listElement.appendChild(emptyMessage);
+            return;
+        }
         
         leaderboard.forEach((entry, index) => {
             const rank = index + 1;
@@ -359,8 +366,8 @@ class LeaderboardManager {
                 entryElement.classList.add(`rank-${rank}`);
             }
             
-            const verifiedIcon = entry.verified ? '✓' : '⚠';
-            const verifiedTitle = entry.verified ? '검증된 기록' : '사용자 제출 기록';
+            const verifiedIcon = entry.verified ? '✓' : '👤';
+            const verifiedTitle = entry.verified ? '검증된 기록' : '플레이어 기록';
             const verifiedClass = entry.verified ? 'verified' : 'unverified';
             
             entryElement.innerHTML = `
@@ -371,9 +378,9 @@ class LeaderboardManager {
                         <span class="verified-icon ${verifiedClass}" title="${verifiedTitle}">${verifiedIcon}</span>
                     </div>
                     <div class="player-stats">
-                        <span class="score">${entry.score.toLocaleString()}</span>
+                        <span class="score">${entry.score.toLocaleString()}점</span>
                         <span class="level">LV.${entry.level}</span>
-                        <span class="time">${entry.time}s</span>
+                        <span class="time">${entry.time}초</span>
                         <span class="date">${entry.date}</span>
                     </div>
                 </div>
@@ -403,7 +410,55 @@ class LeaderboardManager {
         }
     }
 
-    // 새 기록 입력 모달 표시 (검증 강화)
+    // Alert로 이름 입력받기 (더 간단한 방법)
+    showNewRecordAlert(score, level, time) {
+        const playerName = prompt(`🎉 축하합니다! 새로운 기록을 달성했습니다!
+
+📊 달성 기록:
+• 점수: ${score.toLocaleString()}점
+• 레벨: ${level}
+• 생존 시간: ${time}초
+
+플레이어 이름을 입력하세요 (최대 ${this.maxNameLength}자):`);
+
+        if (playerName !== null) { // 취소하지 않았으면
+            this.submitRecordDirect(playerName || "ANONYMOUS", score, level, time);
+        }
+    }
+
+    // 직접 기록 제출
+    async submitRecordDirect(name, score, level, time) {
+        try {
+            const result = await this.addRecord(name, score, level, time);
+            
+            if (result) {
+                if (typeof soundManager !== 'undefined') {
+                    soundManager.playLevelUpSound();
+                }
+                
+                // 성공 메시지
+                alert(`✅ 기록이 성공적으로 등록되었습니다!
+
+🏆 등록된 정보:
+• 이름: ${name}
+• 점수: ${score.toLocaleString()}점
+• 순위: ${this.getPlayerRank(result, name, score)}위`);
+            }
+        } catch (error) {
+            console.error('기록 제출 오류:', error);
+            alert('❌ 기록 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+        }
+    }
+
+    // 플레이어 순위 찾기
+    getPlayerRank(leaderboard, name, score) {
+        const index = leaderboard.findIndex(entry => 
+            entry.name === name && entry.score === score
+        );
+        return index !== -1 ? index + 1 : '?';
+    }
+
+    // 기존 모달 시스템도 유지 (선택 사용 가능)
     showNewRecordModal(score, level, time) {
         const validation = this.validateScore(score, level, time);
         if (!validation.valid) {
@@ -427,16 +482,13 @@ class LeaderboardManager {
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
         
-        // 입력 필드로 포커스 이동
         setTimeout(() => {
             nameInput.focus();
         }, 100);
         
-        // Enter 키 이벤트 (한 번만 등록)
         nameInput.removeEventListener('keypress', this.handleEnterKey);
         nameInput.addEventListener('keypress', this.handleEnterKey);
         
-        // ESC 키로 모달 닫기
         this.handleEscapeKey = (e) => {
             if (e.key === 'Escape') {
                 this.skipRecord();
@@ -452,7 +504,7 @@ class LeaderboardManager {
         }
     }
 
-    // 기록 제출 (async로 변경)
+    // 기록 제출 (모달 버전)
     async submitRecord() {
         if (!this.currentRecord) return;
         
@@ -465,7 +517,6 @@ class LeaderboardManager {
             return;
         }
 
-        // 제출 버튼 비활성화 (중복 제출 방지)
         const submitButton = document.querySelector('#nameInputOverlay .pixel-button:not(.secondary)');
         const originalText = submitButton.textContent;
         submitButton.disabled = true;
@@ -487,8 +538,7 @@ class LeaderboardManager {
                     soundManager.playLevelUpSound();
                 }
                 
-                // 성공 메시지 표시
-                this.showSuccessMessage('기록이 성공적으로 저장되었습니다!');
+                this.showSuccessMessage('🎉 기록이 성공적으로 저장되었습니다!');
                 
                 showGameOverAfterRecord();
             }
@@ -496,7 +546,6 @@ class LeaderboardManager {
             console.error('기록 제출 오류:', error);
             alert('기록 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
         } finally {
-            // 버튼 복원
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
             submitButton.textContent = originalText;
@@ -505,7 +554,6 @@ class LeaderboardManager {
 
     // 성공 메시지 표시
     showSuccessMessage(message) {
-        // 기존 메시지가 있으면 제거
         const existingMessage = document.querySelector('.success-message');
         if (existingMessage) {
             existingMessage.remove();
@@ -531,7 +579,6 @@ class LeaderboardManager {
 
         document.body.appendChild(messageElement);
 
-        // 3초 후 자동 제거
         setTimeout(() => {
             if (messageElement.parentNode) {
                 messageElement.remove();
@@ -539,13 +586,11 @@ class LeaderboardManager {
         }, 3000);
     }
 
-    // 기록 등록 건너뛰기
     skipRecord() {
         this.closeNewRecordModal();
         showGameOverAfterRecord();
     }
 
-    // 새 기록 모달 닫기
     closeNewRecordModal() {
         const overlay = document.getElementById('nameInputOverlay');
         overlay.classList.remove('show');
@@ -553,23 +598,20 @@ class LeaderboardManager {
         
         this.currentRecord = null;
         
-        // ESC 키 이벤트 제거
         if (this.handleEscapeKey) {
             document.removeEventListener('keydown', this.handleEscapeKey);
             this.handleEscapeKey = null;
         }
         
-        // 이전에 포커스되었던 요소로 포커스 복원
         if (this.previouslyFocusedElement) {
             this.previouslyFocusedElement.focus();
             this.previouslyFocusedElement = null;
         }
     }
 
-    // 리더보드 모달 열기 (async로 변경)
+    // 리더보드 모달 열기
     async openLeaderboard() {
         try {
-            // 현재 포커스된 요소 저장
             this.previouslyFocusedElement = document.activeElement;
             
             await this.renderLeaderboard();
@@ -578,7 +620,6 @@ class LeaderboardManager {
             overlay.classList.add('show');
             overlay.setAttribute('aria-hidden', 'false');
             
-            // 모달 내 첫 번째 포커스 가능한 요소로 포커스 이동
             setTimeout(() => {
                 const closeButton = overlay.querySelector('.pixel-button');
                 if (closeButton) {
@@ -598,99 +639,19 @@ class LeaderboardManager {
         overlay.classList.remove('show');
         overlay.setAttribute('aria-hidden', 'true');
         
-        // 이전에 포커스되었던 요소로 포커스 복원
         if (this.previouslyFocusedElement) {
             this.previouslyFocusedElement.focus();
             this.previouslyFocusedElement = null;
         }
     }
 
-    // 리더보드 내보내기 (웹 전용 기능)
-    exportLeaderboard() {
-        try {
-            const leaderboard = this.loadLocalLeaderboard();
-            const dataStr = JSON.stringify(leaderboard, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `avoider-io-leaderboard-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            console.log('리더보드 내보내기 완료');
-        } catch (error) {
-            console.error('리더보드 내보내기 실패:', error);
-            alert('리더보드 내보내기에 실패했습니다.');
-        }
-    }
-
-    // 리더보드 가져오기 (웹 전용 기능)
-    importLeaderboard(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                const validatedData = this.validateLeaderboardData(importedData);
-                
-                if (validatedData.length > 0) {
-                    const currentData = this.loadLocalLeaderboard();
-                    const mergedData = [...currentData, ...validatedData];
-                    
-                    // 중복 제거 및 정렬
-                    const uniqueData = mergedData.filter((entry, index, self) => 
-                        index === self.findIndex(e => 
-                            e.name === entry.name && 
-                            e.score === entry.score && 
-                            e.level === entry.level
-                        )
-                    );
-                    
-                    uniqueData.sort((a, b) => {
-                        if (b.score !== a.score) return b.score - a.score;
-                        if (b.level !== a.level) return b.level - a.level;
-                        return b.time - a.time;
-                    });
-                    
-                    // 상위 10개만 유지
-                    uniqueData.splice(this.maxEntries);
-                    
-                    this.saveLocalLeaderboard(uniqueData);
-                    this.showSuccessMessage('리더보드를 성공적으로 가져왔습니다!');
-                } else {
-                    alert('유효한 리더보드 데이터가 없습니다.');
-                }
-            } catch (error) {
-                console.error('리더보드 가져오기 실패:', error);
-                alert('파일 형식이 올바르지 않습니다.');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    // 리더보드 초기화
-    resetLeaderboard() {
-        if (confirm('정말로 리더보드를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-            try {
-                localStorage.removeItem(this.storageKey);
-                this.showSuccessMessage('리더보드가 초기화되었습니다.');
-                console.log('리더보드 초기화 완료');
-            } catch (error) {
-                console.error('리더보드 초기화 실패:', error);
-                alert('리더보드 초기화에 실패했습니다.');
-            }
-        }
-    }
-
-    // 통계 정보 가져오기
+    // 통계 정보
     getStatistics() {
         try {
             const leaderboard = this.loadLocalLeaderboard();
-            const userEntries = leaderboard.filter(entry => !entry.verified);
             
             return {
                 totalEntries: leaderboard.length,
-                userEntries: userEntries.length,
-                systemEntries: leaderboard.length - userEntries.length,
                 highestScore: leaderboard.length > 0 ? leaderboard[0].score : 0,
                 averageScore: leaderboard.length > 0 ? 
                     Math.round(leaderboard.reduce((sum, entry) => sum + entry.score, 0) / leaderboard.length) : 0,
@@ -700,8 +661,6 @@ class LeaderboardManager {
             console.error('통계 정보 가져오기 실패:', error);
             return {
                 totalEntries: 0,
-                userEntries: 0,
-                systemEntries: 0,
                 highestScore: 0,
                 averageScore: 0,
                 lastUpdated: '알 수 없음'
@@ -709,11 +668,25 @@ class LeaderboardManager {
         }
     }
 
-    // 디버그 정보 출력
+    // 리더보드 초기화
+    resetLeaderboard() {
+        if (confirm('정말로 리더보드를 초기화하시겠습니까?\n\n⚠️ 모든 기록이 삭제되며 되돌릴 수 없습니다.')) {
+            try {
+                localStorage.removeItem(this.storageKey);
+                this.showSuccessMessage('🗑️ 리더보드가 초기화되었습니다.');
+                console.log('리더보드 초기화 완료');
+            } catch (error) {
+                console.error('리더보드 초기화 실패:', error);
+                alert('리더보드 초기화에 실패했습니다.');
+            }
+        }
+    }
+
+    // 디버그 정보
     debugInfo() {
         console.group('🎮 Avoider.io 리더보드 디버그 정보');
         console.log('저장소 키:', this.storageKey);
-        console.log('웹 전용 모드:', this.webOnlyMode);
+        console.log('최소 유효 점수:', this.minValidScore);
         console.log('암호화 키:', this.encryptionKey.substring(0, 8) + '...');
         console.log('게임 세션 데이터:', this.gameSessionData);
         console.log('통계:', this.getStatistics());
@@ -725,7 +698,7 @@ class LeaderboardManager {
 // 전역 리더보드 매니저 인스턴스
 const leaderboardManager = new LeaderboardManager();
 
-// 전역 함수들 (HTML onclick에서 사용)
+// 전역 함수들
 function openLeaderboard() {
     leaderboardManager.openLeaderboard();
 }
@@ -742,11 +715,6 @@ function skipRecord() {
     leaderboardManager.skipRecord();
 }
 
-// 웹 전용 추가 기능들
-function exportLeaderboard() {
-    leaderboardManager.exportLeaderboard();
-}
-
 function resetLeaderboard() {
     leaderboardManager.resetLeaderboard();
 }
@@ -754,34 +722,31 @@ function resetLeaderboard() {
 function showLeaderboardStats() {
     const stats = leaderboardManager.getStatistics();
     alert(`📊 리더보드 통계
-    
-전체 기록: ${stats.totalEntries}개
-사용자 기록: ${stats.userEntries}개
-시스템 기록: ${stats.systemEntries}개
 
+전체 기록: ${stats.totalEntries}개
 최고 점수: ${stats.highestScore.toLocaleString()}점
 평균 점수: ${stats.averageScore.toLocaleString()}점
 
 마지막 업데이트: ${stats.lastUpdated}`);
 }
 
-// 개발자 도구에서 사용할 수 있는 디버그 함수
+// 디버그 함수
 window.debugLeaderboard = function() {
     leaderboardManager.debugInfo();
 };
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎮 Avoider.io 리더보드 시스템 (웹 전용) 초기화 완료');
+    console.log('🎮 Avoider.io 실제 리더보드 시스템 초기화 완료');
+    console.log(`📋 최소 기록 점수: ${leaderboardManager.minValidScore}점`);
     
-    // 브라우저 호환성 체크
     if (typeof Storage === 'undefined') {
         console.warn('⚠️ 이 브라우저는 로컬 저장소를 지원하지 않습니다.');
         alert('이 브라우저는 로컬 저장소를 지원하지 않아 기록 저장이 불가능합니다.');
     }
 });
 
-// CSS 애니메이션 추가 (동적으로)
+// CSS 애니메이션 추가
 const style = document.createElement('style');
 style.textContent = `
     @keyframes fadeInOut {
@@ -797,6 +762,22 @@ style.textContent = `
     
     .verified-icon.unverified {
         color: var(--unverified-color, #ffaa00);
+    }
+    
+    .empty-leaderboard-message {
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .empty-leaderboard-message h3 {
+        margin-bottom: 15px;
+        color: #ffd700;
+    }
+    
+    .empty-leaderboard-message p {
+        margin-bottom: 10px;
+        line-height: 1.4;
     }
 `;
 document.head.appendChild(style);

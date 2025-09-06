@@ -486,7 +486,7 @@ class Game {
         
         // 의심스러운 활동이 감지된 경우 리더보드 등록 차단
         if (this.gameIntegrity.suspicious) {
-            alert('비정상적인 활동이 감지되어 리더보드에 등록할 수 없습니다.');
+            alert('❌ 비정상적인 활동이 감지되어 리더보드에 등록할 수 없습니다.');
             this.showGameOverModal();
             return;
         }
@@ -503,11 +503,24 @@ class Game {
                 
                 const isNewRecord = await leaderboardManager.isNewRecord(finalScore);
                 if (isNewRecord) {
-                    leaderboardManager.showNewRecordModal(finalScore, finalLevel, finalTime);
+                    console.log('🎉 새로운 기록 달성!');
+                    
+                    // Alert 방식으로 이름 입력받기
+                    setTimeout(() => {
+                        leaderboardManager.showNewRecordAlert(finalScore, finalLevel, finalTime);
+                        
+                        // Alert 처리 후 게임오버 모달 표시
+                        setTimeout(() => {
+                            this.showGameOverModal();
+                        }, 500);
+                    }, 1000); // 1초 후에 Alert 표시 (게임오버 사운드 후)
+                    
                 } else {
+                    console.log('기존 기록보다 낮음');
                     this.showGameOverModal();
                 }
             } else {
+                console.warn('리더보드 매니저를 찾을 수 없습니다');
                 this.showGameOverModal();
             }
         } catch (error) {
