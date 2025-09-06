@@ -1,4 +1,4 @@
-/* 8-bit Pixel Style CSS */
+/* 8-bit Pixel Style CSS - 보안 강화 버전 */
 @import url('https://fonts.googleapis.com/css2?family=Courier+New:wght@400;700&display=swap');
 
 :root {
@@ -10,6 +10,11 @@
     --laser-fire-color: #ff00ff;
     --heart-color: #ff1493;
     --arena-border: #ffffff;
+    --success-color: #00ff00;
+    --warning-color: #ff9900;
+    --danger-color: #ff0000;
+    --verified-color: #00dd00;
+    --unverified-color: #ffaa00;
 }
 
 body.light-mode {
@@ -20,6 +25,11 @@ body.light-mode {
     --laser-warn-color: #ff8800;
     --laser-fire-color: #cc00cc;
     --arena-border: #333333;
+    --success-color: #009900;
+    --warning-color: #cc7700;
+    --danger-color: #cc0000;
+    --verified-color: #00aa00;
+    --unverified-color: #cc8800;
 }
 
 * {
@@ -36,29 +46,38 @@ body {
     image-rendering: pixelated;
     overflow: hidden;
     transition: all 0.3s ease;
+    /* 우클릭 방지 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.main-menu {
+/* 드래그 방지 */
+* {
+    -webkit-user-drag: none;
+    -moz-user-drag: none;
+}
+
+.game-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    width: 100vw;
     height: 100vh;
-    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
-.game-title {
-    font-size: 4rem;
-    margin-bottom: 2rem;
-    text-shadow: 3px 3px 0px var(--spike-color);
-    letter-spacing: 3px;
-}
-
-.game-description {
-    font-size: 1.2rem;
-    margin-bottom: 3rem;
-    max-width: 600px;
-    line-height: 1.6;
+#gameCanvas {
+    border: 3px solid var(--arena-border);
+    background-color: var(--bg-color);
+    image-rendering: pixelated;
+    /* 우클릭 방지 */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .pixel-button {
@@ -74,86 +93,34 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
     transition: all 0.1s ease;
+    outline: none;
 }
 
-.pixel-button:hover {
+.pixel-button:hover:not(:disabled) {
     background-color: var(--bg-color);
     color: var(--ui-color);
 }
 
-.theme-toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: 2px solid var(--ui-color);
+.pixel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #666666;
+    border-color: #666666;
+    color: #cccccc;
+}
+
+.pixel-button.secondary {
+    background-color: transparent;
     color: var(--ui-color);
-    font-size: 1.5rem;
-    padding: 10px;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.controls {
-    margin-top: 2rem;
-    font-size: 1rem;
-    opacity: 0.8;
-}
-
-.game-container {
-    display: none;
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    justify-content: center;
-    align-items: center;
-}
-
-#gameCanvas {
-    border: 3px solid var(--arena-border);
-    background-color: var(--bg-color);
-    image-rendering: pixelated;
-}
-
-.game-ui {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 0px var(--bg-color);
-}
-
-.game-ui div {
-    margin-bottom: 5px;
-}
-
-.pause-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.pause-menu {
-    background-color: var(--bg-color);
     border: 3px solid var(--ui-color);
-    padding: 3rem;
-    text-align: center;
 }
 
-.pause-title {
-    font-size: 2.5rem;
-    margin-bottom: 2rem;
+.pixel-button.secondary:hover:not(:disabled) {
+    background-color: var(--ui-color);
+    color: var(--bg-color);
 }
 
-.game-over-overlay {
+.pause-overlay, .game-over-overlay, .leaderboard-overlay, .name-input-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -164,19 +131,30 @@ body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    z-index: 1000;
 }
 
-.game-over-menu {
+.pause-menu, .game-over-menu, .leaderboard-menu, .name-input-menu {
     background-color: var(--bg-color);
-    border: 3px solid var(--spike-color);
+    border: 3px solid var(--ui-color);
     padding: 3rem;
     text-align: center;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.pause-title, .game-over-title, .leaderboard-title, .name-input-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .game-over-title {
-    font-size: 3rem;
     color: var(--spike-color);
-    margin-bottom: 2rem;
+}
+
+.name-input-title {
+    color: var(--success-color);
 }
 
 .final-score-display {
@@ -187,13 +165,158 @@ body {
     color: var(--text-color);
 }
 
-.stats {
+.stats, .record-stats {
     font-size: 1.2rem;
     margin-bottom: 2rem;
 }
 
-.stats p {
+.stats p, .record-stats p {
     margin-bottom: 0.5rem;
+}
+
+.record-message {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: var(--success-color);
+}
+
+.name-input-container {
+    margin: 2rem 0;
+}
+
+.name-input-container label {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.name-input-container input {
+    background-color: var(--bg-color);
+    border: 3px solid var(--ui-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 15px;
+    text-align: center;
+    text-transform: uppercase;
+    width: 200px;
+    outline: none;
+}
+
+.name-input-container input:focus {
+    border-color: var(--success-color);
+    box-shadow: 0 0 10px var(--success-color);
+}
+
+.leaderboard-list {
+    margin: 1.5rem 0;
+    min-height: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.leaderboard-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.6rem;
+    border: 2px solid var(--ui-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    position: relative;
+}
+
+.leaderboard-entry.empty {
+    opacity: 0.3;
+}
+
+.leaderboard-entry.rank-1 {
+    border-color: #ffd700;
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+.leaderboard-entry.rank-2 {
+    border-color: #c0c0c0;
+    background-color: rgba(192, 192, 192, 0.1);
+}
+
+.leaderboard-entry.rank-3 {
+    border-color: #cd7f32;
+    background-color: rgba(205, 127, 50, 0.1);
+}
+
+.leaderboard-entry .rank {
+    font-size: 1.4rem;
+    font-weight: bold;
+    min-width: 45px;
+    text-align: center;
+}
+
+.leaderboard-entry.rank-1 .rank {
+    color: #ffd700;
+}
+
+.leaderboard-entry.rank-2 .rank {
+    color: #c0c0c0;
+}
+
+.leaderboard-entry.rank-3 .rank {
+    color: #cd7f32;
+}
+
+.player-info {
+    flex: 1;
+    text-align: left;
+    margin-left: 1.2rem;
+}
+
+.player-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.verified-icon {
+    font-size: 0.9rem;
+    cursor: help;
+}
+
+.verified-icon[title*="검증된"] {
+    color: var(--verified-color);
+}
+
+.verified-icon[title*="사용자"] {
+    color: var(--unverified-color);
+}
+
+.player-stats {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.player-stats span {
+    min-width: 60px;
+}
+
+.score {
+    color: var(--success-color);
+}
+
+.level {
+    color: var(--warning-color);
+}
+
+.time {
+    color: var(--ui-color);
+}
+
+.date {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .bottom-controls {
@@ -206,23 +329,174 @@ body {
     opacity: 0.7;
 }
 
+/* 보안 경고 스타일 */
+.security-warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, var(--danger-color), #ff4444);
+    color: white;
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 9999;
+    animation: securityPulse 2s infinite;
+}
+
+@keyframes securityPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 개발자 도구 감지 경고 */
+.devtools-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.95);
+    color: white;
+    padding: 2rem;
+    border: 3px solid white;
+    text-align: center;
+    font-size: 1.2rem;
+    z-index: 10000;
+    max-width: 400px;
+}
+
+/* 제출 중 로딩 스타일 */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* 접근성 개선 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    .pixel-button {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+        margin: 8px;
+    }
+    
+    .pause-menu, .game-over-menu, .leaderboard-menu, .name-input-menu {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .pause-title, .game-over-title, .leaderboard-title, .name-input-title {
+        font-size: 2rem;
+    }
+    
+    .final-score-display {
+        font-size: 3rem;
+    }
+    
+    .player-stats {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .player-stats span {
+        min-width: auto;
+    }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+    :root {
+        --bg-color: #000000;
+        --text-color: #ffffff;
+        --ui-color: #ffffff;
+    }
+    
+    body.light-mode {
+        --bg-color: #ffffff;
+        --text-color: #000000;
+        --ui-color: #000000;
+    }
+}
+
+/* 애니메이션 감소 설정 지원 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 .hidden {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 .show {
     display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
-/* Hearts display */
-.hearts {
-    display: inline-flex;
-    align-items: center;
+/* 포커스 표시 개선 */
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--success-color);
+    outline-offset: 2px;
 }
 
-.heart {
-    width: 20px;
-    height: 20px;
-    margin-right: 3px;
-    image-rendering: pixelated;
+/* 호버 효과 개선 */
+.leaderboard-entry:hover:not(.empty) {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    transition: all 0.2s ease;
+}
+
+/* 스크롤바 스타일링 */
+.leaderboard-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+    background: var(--bg-color);
+    border: 1px solid var(--ui-color);
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+    background: var(--ui-color);
+    border-radius: 2px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb:hover {
+    background: var(--success-color);
 }

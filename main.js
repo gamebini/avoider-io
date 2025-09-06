@@ -7,21 +7,31 @@ function initGame() {
 }
 
 function startGame() {
-    document.getElementById('mainMenu').classList.add('hidden');
-    document.getElementById('gameContainer').classList.add('show');
-    document.getElementById('gameOverOverlay').classList.remove('show');
-    game.start();
+    console.log('startGame() called'); // 디버깅용
+    if (game) {
+        game.start();
+    } else {
+        console.error('Game object not initialized');
+    }
 }
 
 function goToMainMenu() {
-    document.getElementById('mainMenu').classList.remove('hidden');
-    document.getElementById('gameContainer').classList.remove('show');
-    document.getElementById('pauseOverlay').classList.remove('show');
-    document.getElementById('gameOverOverlay').classList.remove('show');
+    if (game) {
+        game.goToMainMenu();
+    }
 }
 
 function resumeGame() {
-    game.resumeGame();
+    if (game) {
+        game.resumeGame();
+    }
+}
+
+// 새 기록 입력 완료 후 게임오버 모달 표시
+function showGameOverAfterRecord() {
+    if (game) {
+        game.showGameOverModal();
+    }
 }
 
 // 게임 초기화

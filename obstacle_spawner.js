@@ -6,6 +6,9 @@ class ObstacleSpawner {
         this.nextSpawnDelay = 1000;
         this.lastObstacleType = null;
         this.obstacles = [];
+        this.activeHeartCount = 0; // 활성 하트 개수 추적
+        this.lastHeartSpawnTime = 0; // 마지막 하트 생성 시간
+        this.heartCooldown = 5000; // 하트 생성 쿨다운 5초
     }
     
     getSpawnDelay(level) {
@@ -31,12 +34,14 @@ class ObstacleSpawner {
         return Utils.randomInt(difficulty.min, difficulty.max);
     }
     
-    shouldSpawnHeart(lives) {
+    shouldSpawnHeart(lives, gameTime) {
         return lives < CONFIG.LEVEL.MAX_LIVES_FOR_HEARTS && 
+               this.activeHeartCount === 0 && // 활성 하트가 없을 때만
+               (gameTime - this.lastHeartSpawnTime) >= this.heartCooldown && // 쿨다운 체크
                Math.random() < CONFIG.OBSTACLES.HEART_SPAWN_CHANCE;
     }
     
-    spawnHeart() {
+    spawnHeart(gameTime) {
         let gridX, gridY;
         let attempts = 0;
         const maxAttempts = 20;
@@ -50,6 +55,8 @@ class ObstacleSpawner {
                  this.isPlayerPosition && 
                  this.isPlayerPosition(gridX, gridY));
         
+        this.activeHeartCount++; // 하트 카운트 증가
+        this.lastHeartSpawnTime = gameTime; // 마지막 하트 생성 시간 기록
         return new Heart(gridX, gridY, this.arena);
     }
     
@@ -182,16 +189,16 @@ class ObstacleSpawner {
         return new Bomb(startX, startY, targetX, targetY, this.arena, level);
     }
     
-    update(deltaTime, level, playerLives, speedMultiplier = 1.0) {
+    update(deltaTime, level, playerLives, speedMultiplier = 1.0, gameTime = 0) {
         this.lastSpawnTime += deltaTime;
         
         if (this.lastSpawnTime >= this.nextSpawnDelay) {
             this.lastSpawnTime = 0;
             this.nextSpawnDelay = this.getSpawnDelay(level);
             
-            // 하트 생성 체크
-            if (this.shouldSpawnHeart(playerLives)) {
-                this.obstacles.push(this.spawnHeart());
+            // 하트 생성 체크 (gameTime 매개변수 추가)
+            if (this.shouldSpawnHeart(playerLives, gameTime)) {
+                this.obstacles.push(this.spawnHeart(gameTime));
                 return;
             }
             
@@ -236,6 +243,12 @@ class ObstacleSpawner {
         // 장애물 업데이트 및 정리 (속도 배율 적용)
         this.obstacles = this.obstacles.filter(obstacle => {
             obstacle.update(deltaTime * speedMultiplier);
+            
+            // 하트가 비활성화되면 카운트 감소
+            if (obstacle instanceof Heart && !obstacle.active) {
+                this.activeHeartCount = Math.max(0, this.activeHeartCount - 1);
+            }
+            
             return obstacle.active;
         });
     }
@@ -248,5 +261,7 @@ class ObstacleSpawner {
         this.obstacles = [];
         this.lastSpawnTime = 0;
         this.lastObstacleType = null;
+        this.activeHeartCount = 0; // 하트 카운트 리셋
+        this.lastHeartSpawnTime = 0; // 하트 생성 시간 리셋
     }
 }

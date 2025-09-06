@@ -20,6 +20,8 @@ class SoundManager {
         this.loadSound('start', 'sound/start.wav');
         this.loadSound('pause', 'sound/pause.wav');
         this.loadSound('count', 'sound/count.wav');
+        this.loadSound('gameover', 'sound/gameover.wav'); // 게임오버 사운드 추가
+        this.loadSound('life', 'sound/life.wav'); // 목숨 아이템 사운드 추가
     }
     
     loadSound(name, path) {
@@ -130,6 +132,15 @@ class SoundManager {
     
     playCountSound() {
         return this.playLongSound('count', 0.5);
+    }
+    
+    // 새로 추가된 사운드들
+    playGameOverSound() {
+        this.playSound('gameover', 0.9);
+    }
+    
+    playLifeSound() {
+        this.playSound('life', 0.7);
     }
 }
 

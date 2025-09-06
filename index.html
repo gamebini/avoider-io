@@ -3,101 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avoider.io</title>
+    <title>Avoider.io - 보안 강화 버전</title>
+    <meta name="description" content="피하기 게임 - GitHub Pages에서 안전하게 플레이하세요">
+    <meta name="robots" content="index, follow">
+    
+    <!-- 보안 헤더 -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    
+    <!-- 파비콘 -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- 스타일시트 -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- 개발자 도구 차단을 위한 스크립트 -->
+    <script>
+        // 기본적인 개발자 도구 차단
+        document.addEventListener('keydown', function(e) {
+            // F12, Ctrl+Shift+I/J/C, Ctrl+U 차단
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+        
+        // 우클릭 차단
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // 드래그 차단
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // 선택 차단
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    </script>
 </head>
 <body>
-    <!-- Main Menu -->
-    <div class="main-menu" id="mainMenu">
-        <div class="title-container">
-            <h1 class="game-title">AVOIDER.IO</h1>
-            <div class="title-glow"></div>
-        </div>
-        
-        <div class="game-description">
-            <p class="main-desc">빠른 반응으로 복잡한 장애물들을 피하세요!</p>
-            <div class="features">
-                <div class="feature">
-                    <span class="feature-icon">⚡</span>
-                    <span>격자 기반 정확한 컨트롤</span>
-                </div>
-                <div class="feature">
-                    <span class="feature-icon">🎯</span>
-                    <span>점점 어려워지는 도전</span>
-                </div>
-                <div class="feature">
-                    <span class="feature-icon">🏆</span>
-                    <span>최고 점수 달성하기</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="menu-buttons">
-            <button class="pixel-button main-button" onclick="startGame()">
-                <span class="button-text">START GAME</span>
-                <div class="button-glow"></div>
-            </button>
-        </div>
-        
-        <div class="controls-info">
-            <div class="control-item">
-                <span class="control-key">WASD</span>
-                <span class="control-desc">이동</span>
-            </div>
-            <div class="control-item">
-                <span class="control-key">ESC</span>
-                <span class="control-desc">일시정지</span>
-            </div>
-        </div>
+    <!-- 보안 경고 표시 영역 -->
+    <div id="securityWarning" class="security-warning" style="display: none;">
+        ⚠️ 비정상적인 활동이 감지되었습니다. 공정한 플레이를 위해 협조해주세요.
     </div>
     
-    <!-- Game Container -->
+    <!-- 게임 컨테이너 -->
     <div class="game-container" id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <canvas id="gameCanvas" width="800" height="600" 
+                aria-label="Avoider.io 게임 화면"
+                role="img">
+            이 브라우저는 Canvas를 지원하지 않습니다. 최신 브라우저를 사용해주세요.
+        </canvas>
         
-        <!-- Game UI -->
-        <div class="game-ui">
-            <div>레벨: <span id="levelDisplay">1</span></div>
-            <div>시간: <span id="timeDisplay">0</span>초</div>
-            <div>난이도: <span id="difficultyDisplay">Easy</span></div>
-            <div>맵 크기: <span id="arenaSizeDisplay">3x1</span></div>
-        </div>
-        
-        <!-- Pause Overlay -->
-        <div class="pause-overlay" id="pauseOverlay">
+        <!-- 일시정지 오버레이 -->
+        <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-labelledby="pauseTitle" aria-hidden="true">
             <div class="pause-menu">
-                <h2 class="pause-title">PAUSED</h2>
-                <button class="pixel-button" onclick="resumeGame()">CONTINUE</button>
-                <button class="pixel-button" onclick="goToMainMenu()">MAIN MENU</button>
+                <h2 id="pauseTitle" class="pause-title">PAUSED</h2>
+                <button class="pixel-button" onclick="resumeGame()" aria-label="게임 계속하기">
+                    CONTINUE
+                </button>
+                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동">
+                    MAIN MENU
+                </button>
             </div>
         </div>
         
-        <!-- Game Over Overlay -->
-        <div class="game-over-overlay" id="gameOverOverlay">
+        <!-- 게임오버 오버레이 -->
+        <div class="game-over-overlay" id="gameOverOverlay" role="dialog" aria-labelledby="gameOverTitle" aria-hidden="true">
             <div class="game-over-menu">
-                <h2 class="game-over-title">GAME OVER</h2>
-                <div class="final-score-display">
+                <h2 id="gameOverTitle" class="game-over-title">GAME OVER</h2>
+                <div class="final-score-display" aria-label="최종 점수">
                     <span id="finalScore">0</span>
                 </div>
-                <div class="stats">
-                    <p>레벨: <span id="finalLevel">1</span></p>
-                    <p>생존 시간: <span id="finalTime">0</span>초</p>
+                <div class="stats" role="group" aria-label="게임 통계">
+                    <p>레벨: <span id="finalLevel" aria-label="도달한 레벨">1</span></p>
+                    <p>생존 시간: <span id="finalTime" aria-label="생존한 시간">0</span>초</p>
                 </div>
-                <button class="pixel-button" onclick="startGame()">RETRY</button>
-                <button class="pixel-button" onclick="goToMainMenu()">MAIN MENU</button>
+                <button class="pixel-button" onclick="startGame()" aria-label="게임 다시 시작">
+                    RETRY
+                </button>
+                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동">
+                    MAIN MENU
+                </button>
             </div>
         </div>
         
-        <!-- Bottom Controls -->
-        <div class="bottom-controls">
-            WASD/방향키: 이동 | ESC: 일시정지
+        <!-- 리더보드 오버레이 -->
+        <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
+            <div class="leaderboard-menu">
+                <h2 id="leaderboardTitle" class="leaderboard-title">LEADERBOARD</h2>
+                <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표">
+                    <!-- 리더보드 항목들이 여기에 동적으로 추가됩니다 -->
+                </div>
+                <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+        
+        <!-- 이름 입력 오버레이 -->
+        <div class="name-input-overlay" id="nameInputOverlay" role="dialog" aria-labelledby="nameInputTitle" aria-hidden="true">
+            <div class="name-input-menu">
+                <h2 id="nameInputTitle" class="name-input-title">NEW RECORD!</h2>
+                <p class="record-message">축하합니다! 새로운 기록을 달성했습니다!</p>
+                <div class="record-stats" role="group" aria-label="달성한 기록">
+                    <p>점수: <span id="recordScore" aria-label="달성한 점수">0</span></p>
+                    <p>레벨: <span id="recordLevel" aria-label="도달한 레벨">1</span></p>
+                    <p>생존 시간: <span id="recordTime" aria-label="생존한 시간">0</span>초</p>
+                </div>
+                <div class="name-input-container">
+                    <label for="playerName">이름을 입력하세요:</label>
+                    <input type="text" 
+                           id="playerName" 
+                           maxlength="15" 
+                           placeholder="플레이어"
+                           autocomplete="off"
+                           spellcheck="false"
+                           aria-label="플레이어 이름 입력"
+                           aria-describedby="nameInputHelp">
+                    <div id="nameInputHelp" class="sr-only">
+                        최대 15자까지 입력 가능하며, 특수문자는 자동으로 제거됩니다.
+                    </div>
+                </div>
+                <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록">
+                    등록
+                </button>
+                <button class="pixel-button secondary" onclick="skipRecord()" aria-label="기록 등록 건너뛰기">
+                    건너뛰기
+                </button>
+            </div>
+        </div>
+        
+        <!-- 하단 컨트롤 안내 -->
+        <div class="bottom-controls" role="complementary" aria-label="게임 조작법">
+            <kbd>WASD</kbd>/<kbd>방향키</kbd>: 이동 | <kbd>ESC</kbd>: 일시정지 | <kbd>Space</kbd>: 게임 시작
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- 숨겨진 접근성 정보 -->
+    <div class="sr-only" id="gameInstructions">
+        이 게임은 장애물을 피해 최대한 오래 생존하는 게임입니다. 
+        WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요.
+        하트 아이템을 먹으면 생명력이 회복됩니다.
+    </div>
+
+    <!-- JavaScript 파일들 -->
     <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="sound.js"></script>
+    <script src="leaderboard.js"></script>
     <script src="arena.js"></script>
     <script src="effects.js"></script>
     <script src="obstacle.js"></script>
@@ -105,5 +170,94 @@
     <script src="player.js"></script>
     <script src="game.js"></script>
     <script src="main.js"></script>
+    
+    <!-- 에러 처리 및 로깅 -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('게임 오류:', e.error);
+            // 필요시 에러 로깅 서비스로 전송
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('처리되지 않은 Promise 거부:', e.reason);
+            // 필요시 에러 로깅 서비스로 전송
+        });
+        
+        // 게임 로드 완료 체크
+        window.addEventListener('load', function() {
+            console.log('Avoider.io 게임이 성공적으로 로드되었습니다.');
+            
+            // 사운드 초기화를 위한 첫 번째 클릭 이벤트
+            document.addEventListener('click', function initAudio() {
+                if (typeof soundManager !== 'undefined') {
+                    // 오디오 컨텍스트 초기화
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        if (audioContext.state === 'suspended') {
+                            audioContext.resume();
+                        }
+                    } catch (error) {
+                        console.warn('오디오 컨텍스트 초기화 실패:', error);
+                    }
+                }
+                // 한 번만 실행
+                document.removeEventListener('click', initAudio);
+            });
+            
+            // 보안 경고 표시 함수
+            window.showSecurityWarning = function() {
+                const warning = document.getElementById('securityWarning');
+                if (warning) {
+                    warning.style.display = 'block';
+                    setTimeout(() => {
+                        warning.style.display = 'none';
+                    }, 5000); // 5초 후 숨김
+                }
+            };
+            
+            // 네트워크 상태 모니터링
+            function updateNetworkStatus() {
+                if (!navigator.onLine) {
+                    console.warn('오프라인 상태입니다. 리더보드 기능이 제한될 수 있습니다.');
+                }
+            }
+            
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            
+            // 초기 네트워크 상태 확인
+            updateNetworkStatus();
+        });
+        
+        // 페이지 가시성 변경 감지 (탭 전환 등)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('페이지가 백그라운드로 이동');
+                // 게임이 실행 중이면 자동 일시정지 (game.js에서 처리)
+            } else {
+                console.log('페이지가 포그라운드로 복귀');
+            }
+        });
+        
+        // 브라우저 호환성 체크
+        function checkBrowserCompatibility() {
+            const features = {
+                canvas: !!document.createElement('canvas').getContext,
+                localStorage: typeof Storage !== 'undefined',
+                fetch: typeof fetch !== 'undefined',
+                promise: typeof Promise !== 'undefined'
+            };
+            
+            const unsupported = Object.keys(features).filter(key => !features[key]);
+            
+            if (unsupported.length > 0) {
+                console.warn('지원되지 않는 기능:', unsupported);
+                alert('이 브라우저는 일부 기능을 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
+            }
+        }
+        
+        // 호환성 체크 실행
+        checkBrowserCompatibility();
+    </script>
 </body>
 </html>
