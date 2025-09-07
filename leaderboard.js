@@ -7,20 +7,22 @@ class LeaderboardManager {
         
         // 보안 및 검증 설정
         this.lastSubmissionTime = 0;
-        this.submissionCooldown = 30000; // 30초 쿨다운
+        this.submissionCooldown = 30000;
         this.maxNameLength = 15;
-        this.minValidScore = 500; // 최소 유효 점수 (더미 데이터보다 낮게)
+        this.minValidScore = 500;
         this.encryptionKey = this.generateEncryptionKey();
         
-        // 해킹 방지를 위한 게임 세션 추적
+        // 해킹 방지를 위한 게임 세션 추적 (초기화 개선)
         this.gameSessionData = {
             startTime: 0,
             lastLevelTime: 0,
+            lastLevel: 1,
             scoreCheckpoints: [],
-            validationHash: null
+            validationHash: null,
+            levelUpTimes: [] // 여기서 초기화
         };
         
-        // 실제 리더보드 초기화 (더미 데이터 제거)
+        // 실제 리더보드 초기화
         this.initializeRealLeaderboard();
     }
 
@@ -86,13 +88,26 @@ class LeaderboardManager {
             lastLevel: 1,
             scoreCheckpoints: [0],
             validationHash: this.generateValidationHash(0, 1, Date.now()),
-            levelUpTimes: [] // 레벨업 시간 기록 추가
+            levelUpTimes: [] // 배열 확실히 초기화
         };
-        console.log('🎮 게임 세션 시작 - 완화된 검증 시스템');
+        console.log('🎮 게임 세션 시작 - 안전한 초기화 완료');
     }
 
     // 게임 진행 중 검증 데이터 업데이트
     updateGameSession(score, level, gameTime) {
+        // 게임 세션 데이터가 없으면 초기화
+        if (!this.gameSessionData) {
+            this.startGameSession();
+        }
+        
+        // 배열들이 없으면 초기화
+        if (!this.gameSessionData.scoreCheckpoints) {
+            this.gameSessionData.scoreCheckpoints = [0];
+        }
+        if (!this.gameSessionData.levelUpTimes) {
+            this.gameSessionData.levelUpTimes = [];
+        }
+        
         const now = Date.now();
         const timeSinceStart = now - this.gameSessionData.startTime;
         
@@ -110,26 +125,41 @@ class LeaderboardManager {
             }
         }
 
-        // 레벨 진행 검증 (완전히 새로운 로직)
+        // 레벨 진행 검증 (안전한 처리)
         if (level > this.gameSessionData.lastLevel) {
             // 새로운 레벨에 도달한 경우
             const levelDiff = level - this.gameSessionData.lastLevel;
             const timeSinceLastLevel = now - this.gameSessionData.lastLevelTime;
             
-            // 각 레벨은 CONFIG.LEVEL.DURATION(5초)마다 올라가므로
-            const expectedMinTime = (levelDiff * CONFIG.GAMEPLAY.LEVEL_DURATION) * 0.8; // 20% 여유
+            // CONFIG가 있는지 확인하고 기본값 사용
+            const levelDuration = (typeof CONFIG !== 'undefined' && CONFIG.GAMEPLAY && CONFIG.GAMEPLAY.LEVEL_DURATION) 
+                ? CONFIG.GAMEPLAY.LEVEL_DURATION 
+                : 5000; // 기본값 5초
+            
+            // 각 레벨은 5초마다 올라가므로
+            const expectedMinTime = (levelDiff * levelDuration) * 0.8; // 20% 여유
             
             if (timeSinceLastLevel < expectedMinTime && level > 3) {
                 console.warn(`레벨 진행이 너무 빠름: Level ${this.gameSessionData.lastLevel} → ${level} in ${timeSinceLastLevel}ms (최소: ${expectedMinTime}ms)`);
                 return false;
             }
             
-            // 레벨업 시간 기록
-            this.gameSessionData.levelUpTimes.push({
-                level: level,
-                time: now,
-                gameTime: gameTime
-            });
+            // 레벨업 시간 기록 (안전하게)
+            try {
+                this.gameSessionData.levelUpTimes.push({
+                    level: level,
+                    time: now,
+                    gameTime: gameTime
+                });
+            } catch (error) {
+                console.warn('레벨업 시간 기록 실패:', error);
+                // 배열을 다시 초기화
+                this.gameSessionData.levelUpTimes = [{
+                    level: level,
+                    time: now,
+                    gameTime: gameTime
+                }];
+            }
             
             this.gameSessionData.lastLevel = level;
             this.gameSessionData.lastLevelTime = now;
@@ -137,10 +167,15 @@ class LeaderboardManager {
             console.log(`✅ 레벨 ${level} 도달 (게임시간: ${gameTime}초)`);
         }
 
-        // 점수 체크포인트 업데이트 (너무 자주 저장하지 않도록)
-        const lastCheckpoint = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
-        if (score - lastCheckpoint >= 100) { // 100점 차이날 때만 저장
-            this.gameSessionData.scoreCheckpoints.push(score);
+        // 점수 체크포인트 업데이트 (안전하게)
+        try {
+            const lastCheckpoint = this.gameSessionData.scoreCheckpoints[this.gameSessionData.scoreCheckpoints.length - 1];
+            if (score - lastCheckpoint >= 100) { // 100점 차이날 때만 저장
+                this.gameSessionData.scoreCheckpoints.push(score);
+            }
+        } catch (error) {
+            console.warn('점수 체크포인트 업데이트 실패:', error);
+            this.gameSessionData.scoreCheckpoints = [0, score];
         }
         
         this.gameSessionData.validationHash = this.generateValidationHash(score, level, timeSinceStart);
@@ -211,24 +246,22 @@ class LeaderboardManager {
             return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다` };
         }
 
+        // CONFIG 안전 확인
+        const levelDuration = (typeof CONFIG !== 'undefined' && CONFIG.GAMEPLAY && CONFIG.GAMEPLAY.LEVEL_DURATION) 
+            ? CONFIG.GAMEPLAY.LEVEL_DURATION / 1000 
+            : 5; // 기본값 5초
+
         // 레벨과 게임시간의 관계 검증 (완화)
-        const expectedMinTime = (level - 1) * (CONFIG.GAMEPLAY.LEVEL_DURATION / 1000) * 0.7; // 30% 여유
+        const expectedMinTime = (level - 1) * levelDuration * 0.7; // 30% 여유
         if (gameTime < expectedMinTime && level > 5) {
             console.warn(`시간 부족: Level ${level}에 ${gameTime}초 (최소: ${expectedMinTime}초)`);
             return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 부족합니다` };
         }
 
-        // 점수와 게임시간의 관계 검증 (레벨 증가에 따른 점수 증가 고려)
-        // 기본 점수: 초당 1점 + 레벨 보너스
-        let expectedMaxScore = 0;
-        for (let i = 1; i <= level; i++) {
-            const levelBonus = Math.floor(i / 2) + 1;
-            const levelDuration = CONFIG.GAMEPLAY.LEVEL_DURATION / 1000; // 5초
-            expectedMaxScore += levelBonus * levelDuration * 50; // 레벨당 50배수로 여유
-        }
-        
-        if (score > expectedMaxScore && score > 20000) {
-            console.warn(`점수 과다: ${score}점 (예상 최대: ${expectedMaxScore}점)`);
+        // 점수와 게임시간의 관계 검증 (매우 관대하게)
+        const maxReasonableScore = gameTime * 200; // 초당 최대 200점으로 매우 관대하게
+        if (score > maxReasonableScore && score > 50000) {
+            console.warn(`점수 과다: ${score}점 (합리적 최대: ${maxReasonableScore}점)`);
             return { valid: false, reason: '게임 시간 대비 점수가 너무 높습니다' };
         }
 
@@ -238,6 +271,13 @@ class LeaderboardManager {
 
     // 검증 상태 실시간 확인 (디버그용)
     checkGameProgress(score, level, gameTime) {
+        // 게임 세션 데이터 안전 확인
+        if (!this.gameSessionData || !this.gameSessionData.startTime) {
+            console.warn('게임 세션 데이터가 없습니다. 새로 시작합니다.');
+            this.startGameSession();
+            return null;
+        }
+        
         const now = Date.now();
         const timeSinceStart = (now - this.gameSessionData.startTime) / 1000;
         
@@ -247,14 +287,19 @@ class LeaderboardManager {
         console.log('게임 시간:', gameTime, '초');
         console.log('실제 경과 시간:', timeSinceStart.toFixed(1), '초');
         console.log('마지막 레벨업:', this.gameSessionData.lastLevel);
-        console.log('레벨업 기록:', this.gameSessionData.levelUpTimes);
+        
+        // 안전하게 배열 확인
+        if (this.gameSessionData.levelUpTimes && Array.isArray(this.gameSessionData.levelUpTimes)) {
+            console.log('레벨업 기록:', this.gameSessionData.levelUpTimes);
+        }
         
         // 현재 점수 증가율 계산
         const scorePerSecond = score / Math.max(timeSinceStart, 1);
         console.log('평균 점수 증가율:', scorePerSecond.toFixed(1), '점/초');
         
         // 레벨 진행률 계산
-        const expectedLevel = Math.floor(timeSinceStart / (CONFIG.GAMEPLAY.LEVEL_DURATION / 1000)) + 1;
+        const levelDuration = 5; // 기본 5초
+        const expectedLevel = Math.floor(timeSinceStart / levelDuration) + 1;
         console.log('예상 레벨:', expectedLevel, '/ 실제 레벨:', level);
         
         console.groupEnd();
@@ -272,7 +317,10 @@ class LeaderboardManager {
         this.lenientMode = true;
         this.minValidScore = 100; // 최소 점수 하향
         console.log('🔓 관대한 검증 모드 활성화됨');
-    }
+        
+        // 게임 세션도 다시 시작
+        this.startGameSession();
+}
 
     // 엄격한 검증 모드
     enableStrictMode() {

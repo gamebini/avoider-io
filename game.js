@@ -156,36 +156,8 @@ class Game {
 
     // 입력 보안 검증
     validateInput(keyCode) {
-        const currentTime = Date.now();
-        
-        // 키 입력 빈도 체크
-        this.inputSecurity.keyPressHistory.push(currentTime);
-        
-        // 1초 이내의 키 입력만 유지
-        this.inputSecurity.keyPressHistory = this.inputSecurity.keyPressHistory.filter(
-            time => currentTime - time <= 1000
-        );
-
-        // 초당 키 입력 수 체크
-        if (this.inputSecurity.keyPressHistory.length > this.inputSecurity.maxKeysPerSecond) {
-            console.warn('비정상적인 키 입력 빈도 감지');
-            this.gameIntegrity.suspicious = true;
-            return false;
-        }
-
-        // 키 입력 패턴 분석 (동일한 키의 반복적인 입력)
-        const timeSinceLastKey = currentTime - this.inputSecurity.lastKeyTime;
-        if (timeSinceLastKey < 50) { // 50ms 이내 연속 입력
-            this.inputSecurity.suspiciousPatterns++;
-            if (this.inputSecurity.suspiciousPatterns > 5) {
-                console.warn('의심스러운 키 입력 패턴 감지');
-                this.gameIntegrity.suspicious = true;
-            }
-        } else {
-            this.inputSecurity.suspiciousPatterns = Math.max(0, this.inputSecurity.suspiciousPatterns - 1);
-        }
-
-        this.inputSecurity.lastKeyTime = currentTime;
+        // 키 입력 빈도 체크 제거됨
+        // 이제 모든 키 입력을 허용
         return true;
     }
 
@@ -200,14 +172,13 @@ class Game {
             e.preventDefault();
         });
 
-        // 캔버스 클릭 이벤트 (시작 버튼용)
+        // 캔버스 클릭 이벤트
         this.canvas.addEventListener('click', (e) => {
             if (this.gameState === 'menu') {
                 const rect = this.canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
                 
-                // 시작 버튼 영역 체크
                 const startButtonX = this.canvas.width / 2 - 100;
                 const startButtonY = this.canvas.height / 2 - 25;
                 const buttonWidth = 200;
@@ -219,7 +190,6 @@ class Game {
                     return;
                 }
                 
-                // 리더보드 버튼 영역 체크
                 const leaderboardButtonX = this.canvas.width / 2 - 100;
                 const leaderboardButtonY = this.canvas.height / 2 + 40;
                 
@@ -231,7 +201,7 @@ class Game {
             }
         });
         
-        // 마우스 이벤트 추가 (호버 효과용)
+        // 마우스 이벤트 추가
         this.canvas.addEventListener('mousemove', (e) => {
             if (this.gameState === 'menu') {
                 const rect = this.canvas.getBoundingClientRect();
@@ -261,7 +231,7 @@ class Game {
             }
         });
         
-        // 키보드 이벤트 (보안 검증 추가)
+        // 키보드 이벤트 (키 입력 검증 제거)
         document.addEventListener('keydown', (e) => {
             // F12, Ctrl+Shift+I 등 개발자 도구 단축키 차단
             if (e.key === 'F12' || 
@@ -273,11 +243,7 @@ class Game {
             }
 
             if (this.gameState === 'playing') {
-                // 입력 보안 검증
-                if (!this.validateInput(e.code)) {
-                    e.preventDefault();
-                    return;
-                }
+                // 키 입력 검증 제거 - 바로 게임 입력 처리
                 this.handleGameInput(e);
             } else if (this.gameState === 'paused' && e.code === 'Escape') {
                 this.resumeGame();
@@ -290,19 +256,17 @@ class Game {
             this.keys[e.code] = false;
         });
         
-        // 탭 전환 감지 - 게임이 백그라운드로 가면 자동 일시정지
+        // 탭 전환 감지
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.gameState === 'playing') {
                 this.pauseGame();
             }
         });
 
-        // 창 크기 변경 감지
+        // 창 크기 변경 감지 (완화)
         window.addEventListener('resize', () => {
-            if (this.gameState === 'playing') {
-                console.warn('게임 중 창 크기 변경 감지');
-                this.gameIntegrity.suspicious = true;
-            }
+            // 단순 로그만 남기고 suspicious 표시 제거
+            console.log('창 크기 변경됨');
         });
     }
     
@@ -314,7 +278,7 @@ class Game {
             return;
         }
         
-        // 이동 키 처리 (연속 입력 방지)
+        // 이동 키 처리 (연속 입력 방지만 유지)
         if (this.lastKeyPressTime[e.code] && 
             currentTime - this.lastKeyPressTime[e.code] < this.keyRepeatDelay) {
             return;
@@ -395,7 +359,7 @@ class Game {
         this.score = 0;
         this.lastScoreTime = 0;
         
-        // 보안 상태 초기화
+        // 보안 상태 초기화 (키 입력 보안 제거)
         this.gameIntegrity = {
             startTime: Date.now(),
             lastValidationTime: Date.now(),
@@ -403,18 +367,14 @@ class Game {
             levelHistory: [{level: 1, timestamp: Date.now()}],
             suspicious: false,
             validationInterval: 5000,
-            maxScorePerSecond: 100, // 더 관대하게 설정
-            maxLevelPerMinute: 20    // 더 관대하게 설정
+            maxScorePerSecond: 100,
+            maxLevelPerMinute: 20
         };
         
-        this.inputSecurity = {
-            keyPressHistory: [],
-            maxKeysPerSecond: 15, // 더 관대하게 설정
-            lastKeyTime: 0,
-            suspiciousPatterns: 0
-        };
-
-        // 리더보드 게임 세션 시작 (개선됨)
+        // 입력 보안 관련 코드 완전 제거
+        // this.inputSecurity = { ... }; // 제거됨
+        
+        // 리더보드 게임 세션 시작
         if (typeof leaderboardManager !== 'undefined') {
             try {
                 leaderboardManager.startGameSession();
@@ -444,7 +404,7 @@ class Game {
         };
         
         this.lastTime = performance.now();
-        console.log('🎮 게임 시작 - 완화된 검증 시스템 적용');
+        console.log('🎮 게임 시작 - 키 입력 제한 해제');
     }
     
     showValidationFailure(reason) {
