@@ -1,7 +1,7 @@
 // ===== LEADERBOARD.JS - 실제 리더보드 시스템 =====
 class LeaderboardManager {
     constructor() {
-        this.storageKey = 'avoider_leaderboard_v2';
+        this.storageKey = 'avoiderio_leaderboard_v2';
         this.maxEntries = 10;
         this.currentRecord = null;
         
@@ -64,7 +64,7 @@ class LeaderboardManager {
             const ctx = canvas.getContext('2d');
             ctx.textBaseline = 'top';
             ctx.font = '14px Arial';
-            ctx.fillText('Avoider.io fingerprint', 2, 2);
+            ctx.fillText('AvoiderIo fingerprint', 2, 2);
             
             return btoa(JSON.stringify({
                 userAgent: navigator.userAgent.substring(0, 100),
@@ -212,18 +212,6 @@ class LeaderboardManager {
             .toUpperCase();
     }
 
-    // 점수 유효성 검증
-    startGameSession() {
-        this.gameSessionData = {
-            startTime: Date.now(),
-            lastLevelTime: Date.now(),
-            lastLevel: 1, // 마지막 레벨 추가
-            scoreCheckpoints: [0],
-            validationHash: this.generateValidationHash(0, 1, Date.now())
-        };
-        console.log('🎮 게임 세션 시작됨');
-    }
-
     // 점수 유효성 검증 (완화됨)
     validateScore(score, level, gameTime) {
         console.log(`🔍 점수 검증 시작: ${score}점, 레벨 ${level}, ${gameTime}초`);
@@ -320,7 +308,7 @@ class LeaderboardManager {
         
         // 게임 세션도 다시 시작
         this.startGameSession();
-}
+    }
 
     // 엄격한 검증 모드
     enableStrictMode() {
@@ -854,7 +842,7 @@ class LeaderboardManager {
 
     // 디버그 정보
     debugInfo() {
-        console.group('🎮 Avoider.io 리더보드 디버그 정보');
+        console.group('🎮 AvoiderIo 리더보드 디버그 정보');
         console.log('저장소 키:', this.storageKey);
         console.log('최소 유효 점수:', this.minValidScore);
         console.log('암호화 키:', this.encryptionKey.substring(0, 8) + '...');
@@ -907,7 +895,7 @@ window.debugLeaderboard = function() {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎮 Avoider.io 실제 리더보드 시스템 초기화 완료');
+    console.log('🎮 AvoiderIo 실제 리더보드 시스템 초기화 완료');
     console.log(`📋 최소 기록 점수: ${leaderboardManager.minValidScore}점`);
     
     if (typeof Storage === 'undefined') {

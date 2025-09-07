@@ -746,7 +746,7 @@ class Game {
         this.ctx.font = 'bold 60px "Courier New", monospace';
         this.ctx.textAlign = 'center';
         this.ctx.fillStyle = isDarkMode ? '#ffffff' : '#333333';
-        this.ctx.fillText('AVOIDER.IO', this.canvas.width / 2, this.canvas.height / 2 - 120);
+        this.ctx.fillText('AVOIDERIO', this.canvas.width / 2, this.canvas.height / 2 - 120);
         
         const startButtonX = this.canvas.width / 2 - 100;
         const startButtonY = this.canvas.height / 2 - 25;
