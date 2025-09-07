@@ -24,7 +24,6 @@ class Game {
         // 버튼 호버 상태 초기화 (문의 버튼 추가)
         this.isHoveringStartButton = false;
         this.isHoveringLeaderboardButton = false;
-        this.isHoveringContactButton = false;
         
         // 게임 무결성 검증 (개발자 도구 감지 제거)
         this.gameIntegrity = {
@@ -182,16 +181,6 @@ class Game {
                     leaderboardManager.openLeaderboard();
                     return;
                 }
-                
-                // 문의 버튼 클릭 처리 추가
-                const contactButtonX = this.canvas.width / 2 - 100;
-                const contactButtonY = this.canvas.height / 2 + 105;
-                
-                if (x >= contactButtonX && x <= contactButtonX + buttonWidth &&
-                    y >= contactButtonY && y <= contactButtonY + buttonHeight) {
-                    this.openContactMail();
-                    return;
-                }
             }
         });
         
@@ -215,18 +204,7 @@ class Game {
                 
                 const isHoveringLeaderboard = (x >= leaderboardButtonX && x <= leaderboardButtonX + buttonWidth &&
                     y >= leaderboardButtonY && y <= leaderboardButtonY + buttonHeight);
-                
-                // 문의 버튼 호버 감지 추가
-                const contactButtonX = this.canvas.width / 2 - 100;
-                const contactButtonY = this.canvas.height / 2 + 105;
-                
-                const isHoveringContact = (x >= contactButtonX && x <= contactButtonX + buttonWidth &&
-                    y >= contactButtonY && y <= contactButtonY + buttonHeight);
-                
-                this.isHoveringStartButton = isHoveringStart;
-                this.isHoveringLeaderboardButton = isHoveringLeaderboard;
-                this.isHoveringContactButton = isHoveringContact;
-                
+
                 this.canvas.style.cursor = (isHoveringStart || isHoveringLeaderboard || isHoveringContact) ? 'pointer' : 'default';
             } else {
                 this.canvas.style.cursor = 'default';
@@ -812,12 +790,6 @@ cstv110301@gmail.com
         const leaderboardButtonY = this.canvas.height / 2 + 40;
         
         this.drawButton(leaderboardButtonX, leaderboardButtonY, buttonWidth, buttonHeight, 'LEADERBOARD', this.isHoveringLeaderboardButton, isDarkMode);
-        
-        // 문의 버튼 추가
-        const contactButtonX = this.canvas.width / 2 - 100;
-        const contactButtonY = this.canvas.height / 2 + 105;
-        
-        this.drawButton(contactButtonX, contactButtonY, buttonWidth, buttonHeight, 'CONTACT', this.isHoveringContactButton, isDarkMode);
     }
     
     drawButton(x, y, width, height, text, isHovering, isDarkMode) {
