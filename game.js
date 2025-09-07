@@ -13,7 +13,7 @@ class Game {
             return this.player.gridX === x && this.player.gridY === y;
         });
         
-        this.gameState = 'menu'; // 'menu', 'playing', 'paused', 'gameOver'
+        this.gameState = 'menu';
         this.level = 1;
         this.gameTime = 0;
         this.levelTime = 0;
@@ -21,24 +21,16 @@ class Game {
         this.score = 0;
         this.lastScoreTime = 0;
         
-        // 보안 및 무결성 검증
+        // 게임 무결성 검증 (개발자 도구 감지 제거)
         this.gameIntegrity = {
             startTime: 0,
             lastValidationTime: 0,
             scoreHistory: [],
             levelHistory: [],
             suspicious: false,
-            validationInterval: 5000, // 5초마다 검증
-            maxScorePerSecond: 20, // 초당 최대 점수 증가
-            maxLevelPerMinute: 12 // 분당 최대 레벨 증가
-        };
-        
-        // 입력 보안 (키 매크로 방지)
-        this.inputSecurity = {
-            keyPressHistory: [],
-            maxKeysPerSecond: 10,
-            lastKeyTime: 0,
-            suspiciousPatterns: 0
+            validationInterval: 5000,
+            maxScorePerSecond: 100, // 완화된 제한
+            maxLevelPerMinute: 20   // 완화된 제한
         };
 
         // 게임오버 애니메이션 관련
@@ -61,18 +53,18 @@ class Game {
         this.keyRepeatDelay = 150;
         
         this.setupEventListeners();
-        this.startIntegrityMonitoring();
+        this.startBasicMonitoring(); // 개발자 도구 감지 제거된 모니터링
         this.gameLoop();
     }
 
     // 게임 무결성 모니터링 시작
-    startIntegrityMonitoring() {
+    startBasicMonitoring() {
         setInterval(() => {
             this.validateGameIntegrity();
         }, this.gameIntegrity.validationInterval);
-
-        // 개발자 도구 감지 (기본적인 수준)
-        this.detectDevTools();
+        
+        console.log('🎮 게임 모니터링 시작 (Basic game monitoring started)');
+        console.log('🔧 개발자 도구 제한 없음 (No developer tools restrictions)');
     }
 
     // 개발자 도구 감지 (완벽하지 않지만 기본적인 억제 효과)
@@ -94,42 +86,37 @@ class Game {
         }, 500);
     }
 
-    // 게임 무결성 검증
+    // 개발자 도구 관련 코드 완전 제거된 게임 무결성 검증
     validateGameIntegrity() {
         if (this.gameState !== 'playing') return;
 
         const currentTime = Date.now();
         const gameTimeSeconds = this.gameTime / 1000;
         
-        // 점수 증가율 검증
+        // 점수 증가율 검증 (완화됨)
         if (this.gameIntegrity.scoreHistory.length > 0) {
             const lastScore = this.gameIntegrity.scoreHistory[this.gameIntegrity.scoreHistory.length - 1];
             const scoreDiff = this.score - lastScore.score;
             const timeDiff = (currentTime - lastScore.timestamp) / 1000;
             
-            if (scoreDiff > this.gameIntegrity.maxScorePerSecond * timeDiff && this.score > 500) {
-                console.warn('비정상적인 점수 증가 감지');
-                this.gameIntegrity.suspicious = true;
+            // 매우 관대한 제한 (개발자 친화적)
+            if (scoreDiff > this.gameIntegrity.maxScorePerSecond * timeDiff && this.score > 10000) {
+                console.warn('높은 점수 증가율 감지됨 (High score increase rate detected)');
+                // suspicious 표시 제거 - 단순 로그만
             }
         }
 
-        // 레벨 진행률 검증
+        // 레벨 진행률 검증 (완화됨)
         if (this.gameIntegrity.levelHistory.length > 0) {
             const lastLevel = this.gameIntegrity.levelHistory[this.gameIntegrity.levelHistory.length - 1];
             const levelDiff = this.level - lastLevel.level;
-            const timeDiff = (currentTime - lastLevel.timestamp) / 60000; // 분 단위
+            const timeDiff = (currentTime - lastLevel.timestamp) / 60000;
             
-            if (levelDiff > this.gameIntegrity.maxLevelPerMinute * timeDiff && this.level > 5) {
-                console.warn('비정상적인 레벨 진행 감지');
-                this.gameIntegrity.suspicious = true;
+            // 매우 관대한 제한
+            if (levelDiff > this.gameIntegrity.maxLevelPerMinute * timeDiff && this.level > 10) {
+                console.warn('빠른 레벨 진행 감지됨 (Fast level progression detected)');
+                // suspicious 표시 제거 - 단순 로그만
             }
-        }
-
-        // 게임 시간 검증
-        const expectedMinTime = (this.level - 1) * 5; // 레벨당 최소 5초
-        if (gameTimeSeconds < expectedMinTime && this.level > 3) {
-            console.warn('게임 시간이 너무 짧음');
-            this.gameIntegrity.suspicious = true;
         }
 
         // 히스토리 업데이트
@@ -143,7 +130,7 @@ class Game {
             timestamp: currentTime
         });
 
-        // 히스토리 크기 제한 (메모리 관리)
+        // 히스토리 크기 제한
         if (this.gameIntegrity.scoreHistory.length > 100) {
             this.gameIntegrity.scoreHistory.shift();
         }
@@ -162,16 +149,8 @@ class Game {
     }
 
     setupEventListeners() {
-        // 컨텍스트 메뉴 비활성화 (우클릭 방지)
-        this.canvas.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
-
-        // 드래그 앤 드롭 비활성화
-        this.canvas.addEventListener('dragstart', (e) => {
-            e.preventDefault();
-        });
-
+        // 기본적인 이벤트 리스너만 (개발자 도구 차단 제거)
+        
         // 캔버스 클릭 이벤트
         this.canvas.addEventListener('click', (e) => {
             if (this.gameState === 'menu') {
@@ -201,7 +180,7 @@ class Game {
             }
         });
         
-        // 마우스 이벤트 추가
+        // 마우스 이벤트
         this.canvas.addEventListener('mousemove', (e) => {
             if (this.gameState === 'menu') {
                 const rect = this.canvas.getBoundingClientRect();
@@ -231,19 +210,9 @@ class Game {
             }
         });
         
-        // 키보드 이벤트 (키 입력 검증 제거)
+        // 키보드 이벤트 (개발자 도구 차단 제거)
         document.addEventListener('keydown', (e) => {
-            // F12, Ctrl+Shift+I 등 개발자 도구 단축키 차단
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-                (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                console.warn('개발자 도구 접근 시도 감지');
-                return;
-            }
-
             if (this.gameState === 'playing') {
-                // 키 입력 검증 제거 - 바로 게임 입력 처리
                 this.handleGameInput(e);
             } else if (this.gameState === 'paused' && e.code === 'Escape') {
                 this.resumeGame();
@@ -261,12 +230,6 @@ class Game {
             if (document.hidden && this.gameState === 'playing') {
                 this.pauseGame();
             }
-        });
-
-        // 창 크기 변경 감지 (완화)
-        window.addEventListener('resize', () => {
-            // 단순 로그만 남기고 suspicious 표시 제거
-            console.log('창 크기 변경됨');
         });
     }
     
@@ -375,9 +338,6 @@ class Game {
             maxScorePerSecond: 100,
             maxLevelPerMinute: 20
         };
-        
-        // 입력 보안 관련 코드 완전 제거
-        // this.inputSecurity = { ... }; // 제거됨
         
         // 리더보드 게임 세션 시작
         if (typeof leaderboardManager !== 'undefined') {

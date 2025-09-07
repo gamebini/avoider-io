@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AvoiderIo - Free Online Dodge Game</title>
+    <title>AvoiderIo - 무료 온라인 피하기 게임 (Free Online Dodge Game)</title>
     
     <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
@@ -109,61 +109,6 @@
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Developer Mode Script -->
-    <script>
-        let DEVELOPER_MODE = true;
-
-        window.toggleDevMode = function() {
-            DEVELOPER_MODE = !DEVELOPER_MODE;
-            console.log('🔧 개발자 모드 (Developer Mode):', DEVELOPER_MODE ? 'ON' : 'OFF');
-        };
-
-        document.addEventListener('keydown', function(e) {
-            if (!DEVELOPER_MODE) {
-                if (e.key === 'F12' || 
-                    (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
-                    (e.ctrlKey && e.key === 'U')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🚫 개발자 도구가 차단되었습니다 (Developer tools blocked). 코나미 코드를 입력하세요 (Enter Konami Code): ↑↑↓↓←→←→');
-                    return false;
-                }
-            }
-        });
-
-        document.addEventListener('contextmenu', function(e) {
-            if (!DEVELOPER_MODE) {
-                e.preventDefault();
-                console.log('🚫 우클릭이 차단되었습니다 (Right-click blocked). 코나미 코드를 입력하세요 (Enter Konami Code): ↑↑↓↓←→←→');
-                return false;
-            }
-        });
-
-        // Konami Code
-        let secretSequence = [];
-        const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
-
-        document.addEventListener('keydown', function(e) {
-            secretSequence.push(e.code);
-            
-            if (secretSequence.length > SECRET_CODE.length) {
-                secretSequence.shift();
-            }
-            
-            if (secretSequence.length === SECRET_CODE.length && 
-                secretSequence.every((key, index) => key === SECRET_CODE[index])) {
-                
-                DEVELOPER_MODE = true;
-                console.clear();
-                console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화! (Secret code complete! Developer mode activated!)');
-                console.log('✨ 코나미 코드 (Konami Code): ↑↑↓↓←→←→');
-                console.log('✅ 이제 우클릭이나 F12로 개발자 도구를 열 수 있습니다! (You can now open developer tools with right-click or F12!)');
-                toggleDevMode();
-                secretSequence = [];
-            }
-        });
-    </script>
 </head>
 <body>
     <!-- SEO Header -->
@@ -222,12 +167,12 @@
         <!-- Leaderboard Overlay -->
         <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
             <div class="leaderboard-menu">
-                <h2 id="leaderboardTitle" class="leaderboard-title">LEADERBOARD</h2>
+                <h2 id="leaderboardTitle" class="leaderboard-title">순위표 (LEADERBOARD)</h2>
                 <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표 (Rankings)">
                     <!-- Leaderboard entries will be added here dynamically -->
                 </div>
                 <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기 (Close Leaderboard)">
-                    CLOSE
+                    닫기 (CLOSE)
                 </button>
             </div>
         </div>
@@ -312,6 +257,7 @@
         
         window.addEventListener('load', function() {
             console.log('AvoiderIo 게임이 성공적으로 로드되었습니다. (AvoiderIo game loaded successfully.)');
+            console.log('🔧 개발자 도구 제한 없음 (No developer tools restrictions)');
             
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'page_view', {
