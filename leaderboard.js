@@ -478,8 +478,16 @@ class LeaderboardManager {
             });
 
             leaderboard.splice(this.maxEntries);
-
             this.saveLocalLeaderboard(leaderboard);
+
+            // Analytics: 새 기록 등록 추적
+            const rank = leaderboard.findIndex(entry => 
+                entry.name === name && entry.score === score
+            ) + 1;
+            
+            if (typeof trackHighScore !== 'undefined') {
+                trackHighScore(score, rank === 1); // 1위면 신기록
+            }
 
             console.log('🎉 새 기록 등록:', newRecord);
             return leaderboard;
@@ -770,8 +778,12 @@ class LeaderboardManager {
     // 리더보드 모달 열기
     async openLeaderboard() {
         try {
+            // Analytics: 리더보드 조회 추적
+            if (typeof trackLeaderboardView !== 'undefined') {
+                trackLeaderboardView();
+            }
+
             this.previouslyFocusedElement = document.activeElement;
-            
             await this.renderLeaderboard();
             
             const overlay = document.getElementById('leaderboardOverlay');

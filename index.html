@@ -5,96 +5,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AvoiderIo - 무료 온라인 피하기 게임</title>
     
-    <!-- SEO 메타 태그 -->
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YS3B0F2RL5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        // GA4 설정 (측정 ID를 실제 받은 ID로 교체하세요)
+        gtag('config', 'G-YS3B0F2RL5', {
+            // 쿠키 설정
+            cookie_flags: 'SameSite=None;Secure',
+            // 개인정보 보호 설정
+            anonymize_ip: true,
+            // 사이트 내 검색 추적
+            site_speed_sample_rate: 100,
+            // 커스텀 설정
+            custom_map: {
+                'custom_parameter_1': 'game_level',
+                'custom_parameter_2': 'final_score'
+            }
+        });
+        
+        // 게임 관련 이벤트 추적 함수들
+        function trackGameStart() {
+            gtag('event', 'game_start', {
+                event_category: 'game',
+                event_label: 'new_game',
+                value: 1
+            });
+        }
+        
+        function trackGameOver(score, level, time) {
+            gtag('event', 'game_over', {
+                event_category: 'game',
+                event_label: 'game_completed',
+                value: score,
+                custom_parameter_1: level,
+                custom_parameter_2: score,
+                game_time: time
+            });
+        }
+        
+        function trackLevelUp(level) {
+            gtag('event', 'level_up', {
+                event_category: 'game',
+                event_label: 'level_progression',
+                value: level
+            });
+        }
+        
+        function trackHighScore(score, isNewRecord) {
+            gtag('event', 'high_score', {
+                event_category: 'achievement',
+                event_label: isNewRecord ? 'new_record' : 'high_score',
+                value: score
+            });
+        }
+        
+        function trackLeaderboardView() {
+            gtag('event', 'leaderboard_view', {
+                event_category: 'engagement',
+                event_label: 'leaderboard_opened'
+            });
+        }
+        
+        function trackSoundToggle(enabled) {
+            gtag('event', 'sound_toggle', {
+                event_category: 'settings',
+                event_label: enabled ? 'sound_on' : 'sound_off'
+            });
+        }
+    </script>
+    
+    <!-- 필수 SEO 메타 태그 -->
     <meta name="description" content="AvoiderIo - 장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
     <meta name="keywords" content="AvoiderIo, 피하기 게임, 무료 게임, 온라인 게임, 웹 게임, 아케이드 게임, 생존 게임, 브라우저 게임">
-    <meta name="author" content="AvoiderIo">
     <meta name="robots" content="index, follow">
     
-    <!-- Open Graph (소셜 미디어) -->
-    <meta property="og:title" content="AvoiderIo - 무료 온라인 피하기 게임">
-    <meta property="og:description" content="장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourusername.github.io/repository-name">
-    <meta property="og:image" content="https://yourusername.github.io/repository-name/og-image.png">
-    <meta property="og:site_name" content="AvoiderIo">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AvoiderIo - 무료 온라인 피하기 게임">
-    <meta name="twitter:description" content="장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
-    <meta name="twitter:image" content="https://yourusername.github.io/repository-name/og-image.png">
-    
-    <!-- 구조화된 데이터 (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "VideoGame",
-        "name": "AvoiderIo",
-        "description": "장애물을 피해 최대한 오래 생존하는 무료 온라인 게임",
-        "url": "https://yourusername.github.io/repository-name",
-        "gamePlatform": "웹 브라우저",
-        "genre": "아케이드",
-        "applicationCategory": "Game",
-        "operatingSystem": "모든 플랫폼",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "KRW"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.5",
-            "ratingCount": "100"
-        }
-    }
-    </script>
+    <!-- Google Search Console 인증 태그 (받은 코드로 교체) -->
+    <!-- <meta name="google-site-verification" content="여기에_받은_코드_입력" /> -->
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://avoiderio.xyz">
+    
+    <!-- 기본 파비콘 -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <!-- 보안 헤더 -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     
-    <!-- 파비콘 -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    <link rel="manifest" href="site.webmanifest">
-    
     <!-- 스타일시트 -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Google Analytics (선택사항) -->
-    <!-- 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
-    </script>
-    -->
-    
     <!-- 개발자 모드 스크립트 -->
     <script>
-        // 개발자 모드 설정
         let DEVELOPER_MODE = true;
 
         window.toggleDevMode = function() {
             DEVELOPER_MODE = !DEVELOPER_MODE;
             console.log('🔧 개발자 모드:', DEVELOPER_MODE ? 'ON' : 'OFF');
-            if (DEVELOPER_MODE) {
-                console.log('✅ 개발자 도구가 허용되었습니다.');
-                console.log('💡 사용 가능한 명령어:');
-                console.log('   - debugLeaderboard() : 리더보드 디버그');
-                console.log('   - exportLeaderboard() : 리더보드 내보내기');
-                console.log('   - resetLeaderboard() : 리더보드 초기화');
-                console.log('   - toggleDevMode() : 개발자 모드 끄기');
-            }
         };
 
         document.addEventListener('keydown', function(e) {
@@ -118,20 +130,6 @@
             }
         });
 
-        document.addEventListener('dragstart', function(e) {
-            if (!DEVELOPER_MODE) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        document.addEventListener('selectstart', function(e) {
-            if (!DEVELOPER_MODE) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
         // 코나미 코드
         let secretSequence = [];
         const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
@@ -149,8 +147,6 @@
                 DEVELOPER_MODE = true;
                 console.clear();
                 console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화!');
-                console.log('✨ 코나미 코드: ↑↑↓↓←→←→');
-                console.log('✅ 이제 우클릭이나 F12로 개발자 도구를 열 수 있습니다!');
                 toggleDevMode();
                 secretSequence = [];
             }
@@ -158,7 +154,7 @@
     </script>
 </head>
 <body>
-    <!-- 게임 제목 (SEO용 숨겨진 헤더) -->
+    <!-- SEO용 숨겨진 헤더 -->
     <header style="position: absolute; left: -9999px;">
         <h1>AvoiderIo - 무료 온라인 피하기 게임</h1>
         <p>장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요.</p>
@@ -241,11 +237,7 @@
                            placeholder="플레이어"
                            autocomplete="off"
                            spellcheck="false"
-                           aria-label="플레이어 이름 입력"
-                           aria-describedby="nameInputHelp">
-                    <div id="nameInputHelp" class="sr-only">
-                        최대 15자까지 입력 가능하며, 특수문자는 자동으로 제거됩니다.
-                    </div>
+                           aria-label="플레이어 이름 입력">
                 </div>
                 <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록">
                     등록
@@ -260,13 +252,6 @@
         <div class="bottom-controls" role="complementary" aria-label="게임 조작법">
             <kbd>WASD</kbd>/<kbd>방향키</kbd>: 이동 | <kbd>ESC</kbd>: 일시정지 | <kbd>Space</kbd>: 게임 시작
         </div>
-    </div>
-
-    <!-- 숨겨진 접근성 정보 -->
-    <div class="sr-only" id="gameInstructions">
-        이 게임은 장애물을 피해 최대한 오래 생존하는 게임입니다. 
-        WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요.
-        하트 아이템을 먹으면 생명력이 회복됩니다.
     </div>
 
     <!-- JavaScript 파일들 -->
@@ -286,15 +271,38 @@
     <script>
         window.addEventListener('error', function(e) {
             console.error('게임 오류:', e.error);
+            
+            // Analytics에 오류 이벤트 전송
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'exception', {
+                    description: e.error ? e.error.toString() : 'Unknown error',
+                    fatal: false
+                });
+            }
         });
         
         window.addEventListener('unhandledrejection', function(e) {
             console.error('처리되지 않은 Promise 거부:', e.reason);
+            
+            // Analytics에 Promise 거부 이벤트 전송
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'exception', {
+                    description: 'Unhandled Promise Rejection: ' + e.reason,
+                    fatal: false
+                });
+            }
         });
         
         window.addEventListener('load', function() {
             console.log('AvoiderIo 게임이 성공적으로 로드되었습니다.');
-            console.log('🎮 개발자 모드: 코나미 코드(↑↑↓↓←→←→)로 활성화');
+            
+            // 페이지 로드 완료 이벤트
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'page_view', {
+                    page_title: 'AvoiderIo Game',
+                    page_location: window.location.href
+                });
+            }
             
             document.addEventListener('click', function initAudio() {
                 if (typeof soundManager !== 'undefined') {
@@ -309,53 +317,19 @@
                 }
                 document.removeEventListener('click', initAudio);
             });
-            
-            window.showSecurityWarning = function() {
-                const warning = document.getElementById('securityWarning');
-                if (warning) {
-                    warning.style.display = 'block';
-                    setTimeout(() => {
-                        warning.style.display = 'none';
-                    }, 5000);
-                }
-            };
-            
-            function updateNetworkStatus() {
-                if (!navigator.onLine) {
-                    console.warn('오프라인 상태입니다. 리더보드 기능이 제한될 수 있습니다.');
-                }
-            }
-            
-            window.addEventListener('online', updateNetworkStatus);
-            window.addEventListener('offline', updateNetworkStatus);
-            updateNetworkStatus();
         });
         
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                console.log('페이지가 백그라운드로 이동');
-            } else {
-                console.log('페이지가 포그라운드로 복귀');
+        // 사용자 세션 시간 추적
+        let sessionStartTime = Date.now();
+        window.addEventListener('beforeunload', function() {
+            const sessionDuration = Math.round((Date.now() - sessionStartTime) / 1000);
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'session_duration', {
+                    event_category: 'engagement',
+                    value: sessionDuration
+                });
             }
         });
-        
-        function checkBrowserCompatibility() {
-            const features = {
-                canvas: !!document.createElement('canvas').getContext,
-                localStorage: typeof Storage !== 'undefined',
-                fetch: typeof fetch !== 'undefined',
-                promise: typeof Promise !== 'undefined'
-            };
-            
-            const unsupported = Object.keys(features).filter(key => !features[key]);
-            
-            if (unsupported.length > 0) {
-                console.warn('지원되지 않는 기능:', unsupported);
-                alert('이 브라우저는 일부 기능을 지원하지 않습니다. 최신 브라우저를 사용해주세요.');
-            }
-        }
-        
-        checkBrowserCompatibility();
     </script>
 </body>
 </html>

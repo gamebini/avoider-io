@@ -320,6 +320,11 @@ class Game {
             soundManager.playStartSound();
         }
         
+        // Analytics: 게임 시작 추적
+        if (typeof trackGameStart !== 'undefined') {
+            trackGameStart();
+        }
+
         // 게임오버 애니메이션 중단 및 사운드 정지
         if (this.gameOverAnimation.countSound && typeof soundManager !== 'undefined') {
             soundManager.stopSound(this.gameOverAnimation.countSound);
@@ -458,6 +463,11 @@ class Game {
         const finalLevel = this.level;
         const finalTime = Math.floor(this.gameTime / 1000);
         
+        // Analytics: 게임 오버 추적
+        if (typeof trackGameOver !== 'undefined') {
+            trackGameOver(finalScore, finalLevel, finalTime);
+        }
+
         // 의심스러운 활동이 감지된 경우 리더보드 등록 차단
         if (this.gameIntegrity.suspicious) {
             alert('❌ 비정상적인 활동이 감지되어 리더보드에 등록할 수 없습니다.');
@@ -627,6 +637,11 @@ class Game {
             this.levelTime = 0;
             this.arena.updateSize(this.level);
             this.adjustPlayerPosition();
+            
+            // Analytics: 레벨업 추적
+            if (typeof trackLevelUp !== 'undefined') {
+                trackLevelUp(this.level);
+            }
             
             // 레벨업 시 리더보드 업데이트
             if (typeof leaderboardManager !== 'undefined') {
