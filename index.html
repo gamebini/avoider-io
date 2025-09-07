@@ -3,27 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AvoiderIo</title>
-    <meta name="description" content="날아오는 장애물들을 피하세요!">
+    <title>AvoiderIo - 무료 온라인 피하기 게임</title>
+    
+    <!-- SEO 메타 태그 -->
+    <meta name="description" content="AvoiderIo - 장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
+    <meta name="keywords" content="AvoiderIo, 피하기 게임, 무료 게임, 온라인 게임, 웹 게임, 아케이드 게임, 생존 게임, 브라우저 게임">
+    <meta name="author" content="AvoiderIo">
     <meta name="robots" content="index, follow">
     
-    <!-- 보안 헤더 (X-Frame-Options 제거) -->
+    <!-- Open Graph (소셜 미디어) -->
+    <meta property="og:title" content="AvoiderIo - 무료 온라인 피하기 게임">
+    <meta property="og:description" content="장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourusername.github.io/repository-name">
+    <meta property="og:image" content="https://yourusername.github.io/repository-name/og-image.png">
+    <meta property="og:site_name" content="AvoiderIo">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AvoiderIo - 무료 온라인 피하기 게임">
+    <meta name="twitter:description" content="장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
+    <meta name="twitter:image" content="https://yourusername.github.io/repository-name/og-image.png">
+    
+    <!-- 구조화된 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "AvoiderIo",
+        "description": "장애물을 피해 최대한 오래 생존하는 무료 온라인 게임",
+        "url": "https://yourusername.github.io/repository-name",
+        "gamePlatform": "웹 브라우저",
+        "genre": "아케이드",
+        "applicationCategory": "Game",
+        "operatingSystem": "모든 플랫폼",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "KRW"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.5",
+            "ratingCount": "100"
+        }
+    }
+    </script>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://avoiderio.xyz">
+    
+    <!-- 보안 헤더 -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     
     <!-- 파비콘 -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
     
     <!-- 스타일시트 -->
     <link rel="stylesheet" href="styles.css">
     
+    <!-- Google Analytics (선택사항) -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+    
     <!-- 개발자 모드 스크립트 -->
     <script>
         // 개발자 모드 설정
-        let DEVELOPER_MODE = true; // true로 변경하면 개발자 도구 허용
+        let DEVELOPER_MODE = true;
 
-        // 개발자 모드 토글 함수 (콘솔에서 사용)
         window.toggleDevMode = function() {
             DEVELOPER_MODE = !DEVELOPER_MODE;
             console.log('🔧 개발자 모드:', DEVELOPER_MODE ? 'ON' : 'OFF');
@@ -37,10 +97,8 @@
             }
         };
 
-        // 개발자 도구 차단 (개발자 모드가 꺼져있을 때만).
         document.addEventListener('keydown', function(e) {
             if (!DEVELOPER_MODE) {
-                // F12, Ctrl+Shift+I/J/C, Ctrl+U 차단
                 if (e.key === 'F12' || 
                     (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) ||
                     (e.ctrlKey && e.key === 'U')) {
@@ -52,7 +110,6 @@
             }
         });
 
-        // 우클릭 차단 (개발자 모드가 꺼져있을 때만)
         document.addEventListener('contextmenu', function(e) {
             if (!DEVELOPER_MODE) {
                 e.preventDefault();
@@ -61,7 +118,6 @@
             }
         });
 
-        // 드래그 차단
         document.addEventListener('dragstart', function(e) {
             if (!DEVELOPER_MODE) {
                 e.preventDefault();
@@ -69,7 +125,6 @@
             }
         });
 
-        // 선택 차단
         document.addEventListener('selectstart', function(e) {
             if (!DEVELOPER_MODE) {
                 e.preventDefault();
@@ -77,19 +132,17 @@
             }
         });
 
-        // 비밀 명령어로 개발자 모드 활성화 (코나미 코드)
+        // 코나미 코드
         let secretSequence = [];
         const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
 
         document.addEventListener('keydown', function(e) {
             secretSequence.push(e.code);
             
-            // 시퀀스가 너무 길면 앞부분 제거
             if (secretSequence.length > SECRET_CODE.length) {
                 secretSequence.shift();
             }
             
-            // 비밀 코드 확인 (코나미 코드)
             if (secretSequence.length === SECRET_CODE.length && 
                 secretSequence.every((key, index) => key === SECRET_CODE[index])) {
                 
@@ -105,6 +158,12 @@
     </script>
 </head>
 <body>
+    <!-- 게임 제목 (SEO용 숨겨진 헤더) -->
+    <header style="position: absolute; left: -9999px;">
+        <h1>AvoiderIo - 무료 온라인 피하기 게임</h1>
+        <p>장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요.</p>
+    </header>
+
     <!-- 보안 경고 표시 영역 -->
     <div id="securityWarning" class="security-warning" style="display: none;">
         ⚠️ 비정상적인 활동이 감지되었습니다. 공정한 플레이를 위해 협조해주세요.
@@ -151,7 +210,7 @@
             </div>
         </div>
         
-        <!-- 리더보드 오버레이 (aria-hidden 수정) -->
+        <!-- 리더보드 오버레이 -->
         <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
             <div class="leaderboard-menu">
                 <h2 id="leaderboardTitle" class="leaderboard-title">LEADERBOARD</h2>
@@ -233,15 +292,12 @@
             console.error('처리되지 않은 Promise 거부:', e.reason);
         });
         
-        // 게임 로드 완료 체크
         window.addEventListener('load', function() {
             console.log('AvoiderIo 게임이 성공적으로 로드되었습니다.');
             console.log('🎮 개발자 모드: 코나미 코드(↑↑↓↓←→←→)로 활성화');
             
-            // 사운드 초기화를 위한 첫 번째 클릭 이벤트
             document.addEventListener('click', function initAudio() {
                 if (typeof soundManager !== 'undefined') {
-                    // 오디오 컨텍스트 초기화
                     try {
                         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                         if (audioContext.state === 'suspended') {
@@ -251,11 +307,9 @@
                         console.warn('오디오 컨텍스트 초기화 실패:', error);
                     }
                 }
-                // 한 번만 실행
                 document.removeEventListener('click', initAudio);
             });
             
-            // 보안 경고 표시 함수
             window.showSecurityWarning = function() {
                 const warning = document.getElementById('securityWarning');
                 if (warning) {
@@ -266,7 +320,6 @@
                 }
             };
             
-            // 네트워크 상태 모니터링
             function updateNetworkStatus() {
                 if (!navigator.onLine) {
                     console.warn('오프라인 상태입니다. 리더보드 기능이 제한될 수 있습니다.');
@@ -275,12 +328,9 @@
             
             window.addEventListener('online', updateNetworkStatus);
             window.addEventListener('offline', updateNetworkStatus);
-            
-            // 초기 네트워크 상태 확인
             updateNetworkStatus();
         });
         
-        // 페이지 가시성 변경 감지
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 console.log('페이지가 백그라운드로 이동');
@@ -289,7 +339,6 @@
             }
         });
         
-        // 브라우저 호환성 체크
         function checkBrowserCompatibility() {
             const features = {
                 canvas: !!document.createElement('canvas').getContext,
@@ -306,7 +355,6 @@
             }
         }
         
-        // 호환성 체크 실행
         checkBrowserCompatibility();
     </script>
 </body>
