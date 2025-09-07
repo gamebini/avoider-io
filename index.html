@@ -3,31 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AvoiderIo - 무료 온라인 피하기 게임</title>
+    <title>AvoiderIo - 무료 온라인 닷지 게임 (Free Online Dodge Game)</title>
     
     <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YS3B0F2RL5"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         
-        // GA4 설정 (측정 ID를 실제 받은 ID로 교체하세요)
-        gtag('config', 'G-YS3B0F2RL5', {
-            // 쿠키 설정
+        gtag('config', 'G-XXXXXXXXXX', {
             cookie_flags: 'SameSite=None;Secure',
-            // 개인정보 보호 설정
             anonymize_ip: true,
-            // 사이트 내 검색 추적
             site_speed_sample_rate: 100,
-            // 커스텀 설정
             custom_map: {
                 'custom_parameter_1': 'game_level',
                 'custom_parameter_2': 'final_score'
             }
         });
         
-        // 게임 관련 이벤트 추적 함수들
+        // Game Analytics Functions
         function trackGameStart() {
             gtag('event', 'game_start', {
                 event_category: 'game',
@@ -78,35 +73,50 @@
         }
     </script>
     
-    <!-- 필수 SEO 메타 태그 -->
-    <meta name="description" content="AvoiderIo - 장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. 가시, 레이저, 폭탄을 피하며 최고 기록에 도전하세요!">
-    <meta name="keywords" content="AvoiderIo, 피하기 게임, 무료 게임, 온라인 게임, 웹 게임, 아케이드 게임, 생존 게임, 브라우저 게임">
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="AvoiderIo - 장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. Dodge obstacles and survive as long as possible in this free online game!">
+    <meta name="keywords" content="AvoiderIo, 피하기 게임, dodge game, 무료 게임, free game, 온라인 게임, online game, 웹 게임, web game, 아케이드 게임, arcade game, 생존 게임, survival game, 브라우저 게임, browser game">
     <meta name="robots" content="index, follow">
     
-    <!-- Google Search Console 인증 태그 (받은 코드로 교체) -->
+    <!-- Multilingual Meta -->
+    <meta name="language" content="Korean, English">
+    <link rel="alternate" hreflang="ko" href="https://avoiderio.xyz">
+    <link rel="alternate" hreflang="en" href="https://avoiderio.xyz">
+    <link rel="alternate" hreflang="x-default" href="https://avoiderio.xyz">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="AvoiderIo - 무료 온라인 피하기 게임 (Free Online Dodge Game)">
+    <meta property="og:description" content="장애물을 피해 최대한 오래 생존하세요! Dodge obstacles and survive as long as possible!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://avoiderio.xyz">
+    <meta property="og:site_name" content="AvoiderIo">
+    <meta property="og:locale" content="ko_KR">
+    <meta property="og:locale:alternate" content="en_US">
+    
+    <!-- Google Search Console -->
     <!-- <meta name="google-site-verification" content="여기에_받은_코드_입력" /> -->
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://avoiderio.xyz">
     
-    <!-- 기본 파비콘 -->
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
-    <!-- 보안 헤더 -->
+    <!-- Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     
-    <!-- 스타일시트 -->
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- 개발자 모드 스크립트 -->
+    <!-- Developer Mode Script -->
     <script>
         let DEVELOPER_MODE = true;
 
         window.toggleDevMode = function() {
             DEVELOPER_MODE = !DEVELOPER_MODE;
-            console.log('🔧 개발자 모드:', DEVELOPER_MODE ? 'ON' : 'OFF');
+            console.log('🔧 개발자 모드 (Developer Mode):', DEVELOPER_MODE ? 'ON' : 'OFF');
         };
 
         document.addEventListener('keydown', function(e) {
@@ -116,7 +126,7 @@
                     (e.ctrlKey && e.key === 'U')) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🚫 개발자 도구가 차단되었습니다. 코나미 코드(↑↑↓↓←→←→)를 입력하세요.');
+                    console.log('🚫 개발자 도구가 차단되었습니다 (Developer tools blocked). 코나미 코드를 입력하세요 (Enter Konami Code): ↑↑↓↓←→←→');
                     return false;
                 }
             }
@@ -125,12 +135,12 @@
         document.addEventListener('contextmenu', function(e) {
             if (!DEVELOPER_MODE) {
                 e.preventDefault();
-                console.log('🚫 우클릭이 차단되었습니다. 코나미 코드(↑↑↓↓←→←→)를 입력하세요.');
+                console.log('🚫 우클릭이 차단되었습니다 (Right-click blocked). 코나미 코드를 입력하세요 (Enter Konami Code): ↑↑↓↓←→←→');
                 return false;
             }
         });
 
-        // 코나미 코드
+        // Konami Code
         let secretSequence = [];
         const SECRET_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'];
 
@@ -146,7 +156,9 @@
                 
                 DEVELOPER_MODE = true;
                 console.clear();
-                console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화!');
+                console.log('🎮 비밀 코드 입력 완료! 개발자 모드 활성화! (Secret code complete! Developer mode activated!)');
+                console.log('✨ 코나미 코드 (Konami Code): ↑↑↓↓←→←→');
+                console.log('✅ 이제 우클릭이나 F12로 개발자 도구를 열 수 있습니다! (You can now open developer tools with right-click or F12!)');
                 toggleDevMode();
                 secretSequence = [];
             }
@@ -154,107 +166,114 @@
     </script>
 </head>
 <body>
-    <!-- SEO용 숨겨진 헤더 -->
+    <!-- SEO Header -->
     <header style="position: absolute; left: -9999px;">
-        <h1>AvoiderIo - 무료 온라인 피하기 게임</h1>
-        <p>장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요.</p>
+        <h1>AvoiderIo - 무료 온라인 피하기 게임 (Free Online Dodge Game)</h1>
+        <p>장애물을 피해 최대한 오래 생존하는 무료 온라인 게임입니다. WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요. 
+        Dodge obstacles and survive as long as possible in this free online game. Use WASD keys or arrow keys to move your player and avoid spikes, lasers, and bombs.</p>
     </header>
 
-    <!-- 보안 경고 표시 영역 -->
+    <!-- Security Warning -->
     <div id="securityWarning" class="security-warning" style="display: none;">
-        ⚠️ 비정상적인 활동이 감지되었습니다. 공정한 플레이를 위해 협조해주세요.
+        ⚠️ 비정상적인 활동이 감지되었습니다. 공정한 플레이를 위해 협조해주세요. (Unusual activity detected. Please cooperate for fair play.)
     </div>
     
-    <!-- 게임 컨테이너 -->
+    <!-- Game Container -->
     <div class="game-container" id="gameContainer">
         <canvas id="gameCanvas" width="800" height="600" 
-                aria-label="AvoiderIo 게임 화면"
+                aria-label="AvoiderIo 게임 화면 (AvoiderIo Game Screen)"
                 role="img">
-            이 브라우저는 Canvas를 지원하지 않습니다. 최신 브라우저를 사용해주세요.
+            이 브라우저는 Canvas를 지원하지 않습니다. 최신 브라우저를 사용해주세요. (This browser does not support Canvas. Please use a modern browser.)
         </canvas>
         
-        <!-- 일시정지 오버레이 -->
+        <!-- Pause Overlay -->
         <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-labelledby="pauseTitle" aria-hidden="true">
             <div class="pause-menu">
-                <h2 id="pauseTitle" class="pause-title">PAUSED</h2>
-                <button class="pixel-button" onclick="resumeGame()" aria-label="게임 계속하기">
-                    CONTINUE
+                <h2 id="pauseTitle" class="pause-title">일시정지 (PAUSED)</h2>
+                <button class="pixel-button" onclick="resumeGame()" aria-label="게임 계속하기 (Continue Game)">
+                    계속하기 (CONTINUE)
                 </button>
-                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동">
-                    MAIN MENU
+                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
+                    메인 메뉴 (MAIN MENU)
                 </button>
             </div>
         </div>
         
-        <!-- 게임오버 오버레이 -->
+        <!-- Game Over Overlay -->
         <div class="game-over-overlay" id="gameOverOverlay" role="dialog" aria-labelledby="gameOverTitle" aria-hidden="true">
             <div class="game-over-menu">
-                <h2 id="gameOverTitle" class="game-over-title">GAME OVER</h2>
-                <div class="final-score-display" aria-label="최종 점수">
+                <h2 id="gameOverTitle" class="game-over-title">게임 오버 (GAME OVER)</h2>
+                <div class="final-score-display" aria-label="최종 점수 (Final Score)">
                     <span id="finalScore">0</span>
                 </div>
-                <div class="stats" role="group" aria-label="게임 통계">
-                    <p>레벨: <span id="finalLevel" aria-label="도달한 레벨">1</span></p>
-                    <p>생존 시간: <span id="finalTime" aria-label="생존한 시간">0</span>초</p>
+                <div class="stats" role="group" aria-label="게임 통계 (Game Statistics)">
+                    <p>레벨 (Level): <span id="finalLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
+                    <p>생존 시간 (Survival Time): <span id="finalTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
                 </div>
-                <button class="pixel-button" onclick="startGame()" aria-label="게임 다시 시작">
-                    RETRY
+                <button class="pixel-button" onclick="startGame()" aria-label="게임 다시 시작 (Restart Game)">
+                    다시 시도 (RETRY)
                 </button>
-                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동">
-                    MAIN MENU
+                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
+                    메인 메뉴 (MAIN MENU)
                 </button>
             </div>
         </div>
         
-        <!-- 리더보드 오버레이 -->
+        <!-- Leaderboard Overlay -->
         <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
             <div class="leaderboard-menu">
-                <h2 id="leaderboardTitle" class="leaderboard-title">LEADERBOARD</h2>
-                <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표">
-                    <!-- 리더보드 항목들이 여기에 동적으로 추가됩니다 -->
+                <h2 id="leaderboardTitle" class="leaderboard-title">순위표 (LEADERBOARD)</h2>
+                <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표 (Rankings)">
+                    <!-- Leaderboard entries will be added here dynamically -->
                 </div>
-                <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기">
-                    CLOSE
+                <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기 (Close Leaderboard)">
+                    닫기 (CLOSE)
                 </button>
             </div>
         </div>
         
-        <!-- 이름 입력 오버레이 -->
+        <!-- Name Input Overlay -->
         <div class="name-input-overlay" id="nameInputOverlay" role="dialog" aria-labelledby="nameInputTitle" aria-hidden="true">
             <div class="name-input-menu">
-                <h2 id="nameInputTitle" class="name-input-title">NEW RECORD!</h2>
-                <p class="record-message">축하합니다! 새로운 기록을 달성했습니다!</p>
-                <div class="record-stats" role="group" aria-label="달성한 기록">
-                    <p>점수: <span id="recordScore" aria-label="달성한 점수">0</span></p>
-                    <p>레벨: <span id="recordLevel" aria-label="도달한 레벨">1</span></p>
-                    <p>생존 시간: <span id="recordTime" aria-label="생존한 시간">0</span>초</p>
+                <h2 id="nameInputTitle" class="name-input-title">신기록! (NEW RECORD!)</h2>
+                <p class="record-message">축하합니다! 새로운 기록을 달성했습니다! (Congratulations! You achieved a new record!)</p>
+                <div class="record-stats" role="group" aria-label="달성한 기록 (Achieved Record)">
+                    <p>점수 (Score): <span id="recordScore" aria-label="달성한 점수 (Achieved Score)">0</span></p>
+                    <p>레벨 (Level): <span id="recordLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
+                    <p>생존 시간 (Survival Time): <span id="recordTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
                 </div>
                 <div class="name-input-container">
-                    <label for="playerName">이름을 입력하세요:</label>
+                    <label for="playerName">이름을 입력하세요 (Enter your name):</label>
                     <input type="text" 
                            id="playerName" 
                            maxlength="15" 
-                           placeholder="플레이어"
+                           placeholder="플레이어 (Player)"
                            autocomplete="off"
                            spellcheck="false"
-                           aria-label="플레이어 이름 입력">
+                           aria-label="플레이어 이름 입력 (Enter Player Name)">
                 </div>
-                <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록">
-                    등록
+                <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록 (Submit Record)">
+                    등록 (SUBMIT)
                 </button>
-                <button class="pixel-button secondary" onclick="skipRecord()" aria-label="기록 등록 건너뛰기">
-                    건너뛰기
+                <button class="pixel-button secondary" onclick="skipRecord()" aria-label="기록 등록 건너뛰기 (Skip Record Registration)">
+                    건너뛰기 (SKIP)
                 </button>
             </div>
         </div>
         
-        <!-- 하단 컨트롤 안내 -->
-        <div class="bottom-controls" role="complementary" aria-label="게임 조작법">
-            <kbd>WASD</kbd>/<kbd>방향키</kbd>: 이동 | <kbd>ESC</kbd>: 일시정지 | <kbd>Space</kbd>: 게임 시작
+        <!-- Bottom Controls -->
+        <div class="bottom-controls" role="complementary" aria-label="게임 조작법 (Game Controls)">
+            <kbd>WASD</kbd>/<kbd>방향키 (Arrow Keys)</kbd>: 이동 (Move) | <kbd>ESC</kbd>: 일시정지 (Pause) | <kbd>Space</kbd>: 게임 시작 (Start Game)
         </div>
     </div>
 
-    <!-- JavaScript 파일들 -->
+    <!-- Hidden Accessibility Info -->
+    <div class="sr-only" id="gameInstructions">
+        이 게임은 장애물을 피해 최대한 오래 생존하는 게임입니다. WASD 키나 방향키로 플레이어를 움직여 가시, 레이저, 폭탄을 피하세요. 하트 아이템을 먹으면 생명력이 회복됩니다.
+        This is a survival game where you dodge obstacles to survive as long as possible. Use WASD keys or arrow keys to move your player and avoid spikes, lasers, and bombs. Collect heart items to restore your health.
+    </div>
+
+    <!-- JavaScript Files -->
     <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="sound.js"></script>
@@ -267,12 +286,11 @@
     <script src="game.js"></script>
     <script src="main.js"></script>
     
-    <!-- 에러 처리 및 로깅 -->
+    <!-- Error Handling and Logging -->
     <script>
         window.addEventListener('error', function(e) {
-            console.error('게임 오류:', e.error);
+            console.error('게임 오류 (Game Error):', e.error);
             
-            // Analytics에 오류 이벤트 전송
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'exception', {
                     description: e.error ? e.error.toString() : 'Unknown error',
@@ -282,9 +300,8 @@
         });
         
         window.addEventListener('unhandledrejection', function(e) {
-            console.error('처리되지 않은 Promise 거부:', e.reason);
+            console.error('처리되지 않은 Promise 거부 (Unhandled Promise Rejection):', e.reason);
             
-            // Analytics에 Promise 거부 이벤트 전송
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'exception', {
                     description: 'Unhandled Promise Rejection: ' + e.reason,
@@ -294,9 +311,8 @@
         });
         
         window.addEventListener('load', function() {
-            console.log('AvoiderIo 게임이 성공적으로 로드되었습니다.');
+            console.log('AvoiderIo 게임이 성공적으로 로드되었습니다. (AvoiderIo game loaded successfully.)');
             
-            // 페이지 로드 완료 이벤트
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'page_view', {
                     page_title: 'AvoiderIo Game',
@@ -312,14 +328,14 @@
                             audioContext.resume();
                         }
                     } catch (error) {
-                        console.warn('오디오 컨텍스트 초기화 실패:', error);
+                        console.warn('오디오 컨텍스트 초기화 실패 (Audio context initialization failed):', error);
                     }
                 }
                 document.removeEventListener('click', initAudio);
             });
         });
         
-        // 사용자 세션 시간 추적
+        // Session time tracking
         let sessionStartTime = Date.now();
         window.addEventListener('beforeunload', function() {
             const sessionDuration = Math.round((Date.now() - sessionStartTime) / 1000);

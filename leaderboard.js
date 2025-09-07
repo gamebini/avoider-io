@@ -214,24 +214,22 @@ class LeaderboardManager {
 
     // 점수 유효성 검증 (완화됨)
     validateScore(score, level, gameTime) {
-        console.log(`🔍 점수 검증 시작: ${score}점, 레벨 ${level}, ${gameTime}초`);
+        console.log(`🔍 점수 검증 시작 (Score validation started): ${score}점(pts), 레벨(Level) ${level}, ${gameTime}초(sec)`);
         
-        // 기본 타입 검증
         if (!Number.isInteger(score) || score < 0 || score > 10000000) {
-            return { valid: false, reason: '점수 값이 유효하지 않습니다' };
+            return { valid: false, reason: '점수 값이 유효하지 않습니다 (Invalid score value)' };
         }
 
         if (!Number.isInteger(level) || level < 1 || level > 1000) {
-            return { valid: false, reason: '레벨 값이 유효하지 않습니다' };
+            return { valid: false, reason: '레벨 값이 유효하지 않습니다 (Invalid level value)' };
         }
 
         if (!Number.isInteger(gameTime) || gameTime < 0 || gameTime > 86400) {
-            return { valid: false, reason: '게임 시간이 유효하지 않습니다' };
+            return { valid: false, reason: '게임 시간이 유효하지 않습니다 (Invalid game time)' };
         }
 
-        // 최소 점수 검증
         if (score < this.minValidScore) {
-            return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다` };
+            return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다 (Minimum ${this.minValidScore} points required)` };
         }
 
         // CONFIG 안전 확인
@@ -239,21 +237,17 @@ class LeaderboardManager {
             ? CONFIG.GAMEPLAY.LEVEL_DURATION / 1000 
             : 5; // 기본값 5초
 
-        // 레벨과 게임시간의 관계 검증 (완화)
-        const expectedMinTime = (level - 1) * levelDuration * 0.7; // 30% 여유
         if (gameTime < expectedMinTime && level > 5) {
-            console.warn(`시간 부족: Level ${level}에 ${gameTime}초 (최소: ${expectedMinTime}초)`);
-            return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 부족합니다` };
+            console.warn(`시간 부족 (Insufficient time): Level ${level}에 ${gameTime}초 (최소: ${expectedMinTime}초)`);
+            return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 부족합니다 (Insufficient time to reach level ${level})` };
         }
 
-        // 점수와 게임시간의 관계 검증 (매우 관대하게)
-        const maxReasonableScore = gameTime * 200; // 초당 최대 200점으로 매우 관대하게
         if (score > maxReasonableScore && score > 50000) {
-            console.warn(`점수 과다: ${score}점 (합리적 최대: ${maxReasonableScore}점)`);
-            return { valid: false, reason: '게임 시간 대비 점수가 너무 높습니다' };
+            console.warn(`점수 과다 (Excessive score): ${score}점 (합리적 최대: ${maxReasonableScore}점)`);
+            return { valid: false, reason: '게임 시간 대비 점수가 너무 높습니다 (Score too high for game time)' };
         }
 
-        console.log('✅ 점수 검증 통과');
+        console.log('✅ 점수 검증 통과 (Score validation passed)');
         return { valid: true };
     }
 
@@ -346,7 +340,7 @@ class LeaderboardManager {
             const remainingTime = Math.ceil((this.submissionCooldown - (now - this.lastSubmissionTime)) / 1000);
             return { 
                 canSubmit: false, 
-                reason: `${remainingTime}초 후에 다시 시도하세요` 
+                reason: `${remainingTime}초 후에 다시 시도하세요 (Please try again in ${remainingTime} seconds)` 
             };
         }
         return { canSubmit: true };
@@ -450,7 +444,7 @@ class LeaderboardManager {
         
         const validation = this.validateScore(score, level, time);
         if (!validation.valid) {
-            alert(`❌ 기록 등록 실패: ${validation.reason}`);
+            alert(`❌ 기록 등록 실패 (Record registration failed): ${validation.reason}`);
             return null;
         }
 
@@ -489,11 +483,11 @@ class LeaderboardManager {
                 trackHighScore(score, rank === 1); // 1위면 신기록
             }
 
-            console.log('🎉 새 기록 등록:', newRecord);
+            console.log('🎉 새 기록 등록 (New record registered):', newRecord);
             return leaderboard;
         } catch (error) {
-            console.error('기록 추가 실패:', error);
-            alert('기록 저장 중 오류가 발생했습니다.');
+            console.error('기록 추가 실패 (Record addition failed):', error);
+            alert('기록 저장 중 오류가 발생했습니다. (An error occurred while saving the record.)');
             return null;
         }
     }
@@ -513,9 +507,9 @@ class LeaderboardManager {
             emptyMessage.className = 'empty-leaderboard-message';
             emptyMessage.innerHTML = `
                 <div style="text-align: center; padding: 40px; opacity: 0.7;">
-                    <h3>🏆 아직 기록이 없습니다!</h3>
-                    <p>첫 번째 기록의 주인공이 되어보세요!</p>
-                    <p>최소 ${this.minValidScore}점 이상 달성하면 리더보드에 등록됩니다.</p>
+                    <h3>🏆 아직 기록이 없습니다! (No records yet!)</h3>
+                    <p>첫 번째 기록의 주인공이 되어보세요! (Be the first to set a record!)</p>
+                    <p>최소 ${this.minValidScore}점 이상 달성하면 리더보드에 등록됩니다. (Score at least ${this.minValidScore} points to be registered on the leaderboard.)</p>
                 </div>
             `;
             listElement.appendChild(emptyMessage);
@@ -578,14 +572,14 @@ class LeaderboardManager {
 
     // Alert로 이름 입력받기 (더 간단한 방법)
     showNewRecordAlert(score, level, time) {
-        const playerName = prompt(`🎉 축하합니다! 새로운 기록을 달성했습니다!
+        const playerName = prompt(`🎉 축하합니다! 새로운 기록을 달성했습니다! (Congratulations! You achieved a new record!)
 
-📊 달성 기록:
-• 점수: ${score.toLocaleString()}점
-• 레벨: ${level}
-• 생존 시간: ${time}초
+📊 달성 기록 (Achieved Record):
+• 점수 (Score): ${score.toLocaleString()}점 (pts)
+• 레벨 (Level): ${level}
+• 생존 시간 (Survival Time): ${time}초 (sec)
 
-플레이어 이름을 입력하세요 (최대 ${this.maxNameLength}자):`);
+플레이어 이름을 입력하세요 (Enter your player name) (최대 ${this.maxNameLength}자/chars):`);
 
         if (playerName !== null) { // 취소하지 않았으면
             this.submitRecordDirect(playerName || "ANONYMOUS", score, level, time);
@@ -603,16 +597,16 @@ class LeaderboardManager {
                 }
                 
                 // 성공 메시지
-                alert(`✅ 기록이 성공적으로 등록되었습니다!
+                alert(`✅ 기록이 성공적으로 등록되었습니다! (Record successfully registered!)
 
-🏆 등록된 정보:
-• 이름: ${name}
-• 점수: ${score.toLocaleString()}점
-• 순위: ${this.getPlayerRank(result, name, score)}위`);
+🏆 등록된 정보 (Registered Information):
+• 이름 (Name): ${name}
+• 점수 (Score): ${score.toLocaleString()}점 (pts)
+• 순위 (Rank): ${this.getPlayerRank(result, name, score)}위 (th)`);
             }
         } catch (error) {
-            console.error('기록 제출 오류:', error);
-            alert('❌ 기록 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+            console.error('기록 제출 오류 (Record submission error):', error);
+            alert('❌ 기록 저장 중 오류가 발생했습니다. 다시 시도해주세요. (An error occurred while saving the record. Please try again.)');
         }
     }
 
@@ -628,7 +622,7 @@ class LeaderboardManager {
     showNewRecordModal(score, level, time) {
         const validation = this.validateScore(score, level, time);
         if (!validation.valid) {
-            alert(`기록이 유효하지 않습니다: ${validation.reason}`);
+            alert(`기록이 유효하지 않습니다 (Invalid record): ${validation.reason}`);
             return;
         }
 
@@ -678,7 +672,7 @@ class LeaderboardManager {
         const playerName = nameInput.value.trim();
         
         if (!playerName) {
-            alert('이름을 입력해주세요.');
+            alert('이름을 입력해주세요. (Please enter your name.)');
             nameInput.focus();
             return;
         }
@@ -687,7 +681,7 @@ class LeaderboardManager {
         const originalText = submitButton.textContent;
         submitButton.disabled = true;
         submitButton.classList.add('loading');
-        submitButton.textContent = '저장 중...';
+        submitButton.textContent = '저장 중... (Saving...)';
         
         try {
             const result = await this.addRecord(
@@ -704,13 +698,13 @@ class LeaderboardManager {
                     soundManager.playLevelUpSound();
                 }
                 
-                this.showSuccessMessage('🎉 기록이 성공적으로 저장되었습니다!');
+                this.showSuccessMessage('🎉 기록이 성공적으로 저장되었습니다! (Record successfully saved!)');
                 
                 showGameOverAfterRecord();
             }
         } catch (error) {
-            console.error('기록 제출 오류:', error);
-            alert('기록 저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+            console.error('기록 제출 오류 (Record submission error):', error);
+            alert('기록 저장 중 오류가 발생했습니다. 다시 시도해주세요. (An error occurred while saving the record. Please try again.)');
         } finally {
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
@@ -840,14 +834,14 @@ class LeaderboardManager {
 
     // 리더보드 초기화
     resetLeaderboard() {
-        if (confirm('정말로 리더보드를 초기화하시겠습니까?\n\n⚠️ 모든 기록이 삭제되며 되돌릴 수 없습니다.')) {
+        if (confirm('정말로 리더보드를 초기화하시겠습니까? (Are you sure you want to reset the leaderboard?)\n\n⚠️ 모든 기록이 삭제되며 되돌릴 수 없습니다. (All records will be deleted and cannot be restored.)')) {
             try {
                 localStorage.removeItem(this.storageKey);
-                this.showSuccessMessage('🗑️ 리더보드가 초기화되었습니다.');
-                console.log('리더보드 초기화 완료');
+                this.showSuccessMessage('🗑️ 리더보드가 초기화되었습니다. (Leaderboard has been reset.)');
+                console.log('리더보드 초기화 완료 (Leaderboard reset completed)');
             } catch (error) {
-                console.error('리더보드 초기화 실패:', error);
-                alert('리더보드 초기화에 실패했습니다.');
+                console.error('리더보드 초기화 실패 (Leaderboard reset failed):', error);
+                alert('리더보드 초기화에 실패했습니다. (Failed to reset leaderboard.)');
             }
         }
     }
@@ -907,12 +901,12 @@ window.debugLeaderboard = function() {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎮 AvoiderIo 실제 리더보드 시스템 초기화 완료');
-    console.log(`📋 최소 기록 점수: ${leaderboardManager.minValidScore}점`);
+    console.log('🎮 AvoiderIo 실제 리더보드 시스템 초기화 완료 (AvoiderIo Real Leaderboard System Initialized)');
+    console.log(`📋 최소 기록 점수 (Minimum Record Score): ${leaderboardManager.minValidScore}점 (pts)`);
     
     if (typeof Storage === 'undefined') {
-        console.warn('⚠️ 이 브라우저는 로컬 저장소를 지원하지 않습니다.');
-        alert('이 브라우저는 로컬 저장소를 지원하지 않아 기록 저장이 불가능합니다.');
+        console.warn('⚠️ 이 브라우저는 로컬 저장소를 지원하지 않습니다. (This browser does not support local storage.)');
+        alert('이 브라우저는 로컬 저장소를 지원하지 않아 기록 저장이 불가능합니다. (This browser does not support local storage, so record saving is impossible.)');
     }
 });
 

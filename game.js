@@ -312,7 +312,7 @@ class Game {
     start() {
         // 의심스러운 활동이 감지된 경우 경고
         if (this.gameIntegrity.suspicious) {
-            const confirmStart = confirm('비정상적인 활동이 감지되었습니다. 정말 게임을 시작하시겠습니까?');
+            const confirmStart = confirm('비정상적인 활동이 감지되었습니다. 정말 게임을 시작하시겠습니까? (Unusual activity detected. Do you really want to start the game?)');
             if (!confirmStart) return;
         }
 
@@ -417,7 +417,7 @@ class Game {
         
         // 개발자 모드에서만 상세 정보 표시
         if (typeof DEVELOPER_MODE !== 'undefined' && DEVELOPER_MODE) {
-            alert(`🔍 검증 실패 (개발자 모드): ${reason}\n\n게임을 다시 시작해주세요.`);
+            alert(`🔍 검증 실패 (개발자 모드) (Validation failed - Developer mode): ${reason}\n\n게임을 다시 시작해주세요. (Please restart the game.)`);
         } else {
             // 일반 사용자에게는 간단한 메시지
             console.log('게임 진행에 문제가 감지되었습니다. 게임을 다시 시작해주세요.');
@@ -470,7 +470,7 @@ class Game {
 
         // 의심스러운 활동이 감지된 경우 리더보드 등록 차단
         if (this.gameIntegrity.suspicious) {
-            alert('❌ 비정상적인 활동이 감지되어 리더보드에 등록할 수 없습니다.');
+            alert('❌ 비정상적인 활동이 감지되어 리더보드에 등록할 수 없습니다. (Unusual activity detected. Cannot register to leaderboard.)');
             this.showGameOverModal();
             return;
         }
@@ -751,7 +751,7 @@ class Game {
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = 'bold 16px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('⚠ 비정상적인 활동이 감지되었습니다', this.canvas.width / 2, 20);
+        this.ctx.fillText('⚠ 비정상적인 활동이 감지되었습니다 (Unusual activity detected)', this.canvas.width / 2, 20);
         this.ctx.textAlign = 'start';
     }
     
