@@ -21,6 +21,11 @@ class Game {
         this.score = 0;
         this.lastScoreTime = 0;
         
+        // 버튼 호버 상태 초기화 (문의 버튼 추가)
+        this.isHoveringStartButton = false;
+        this.isHoveringLeaderboardButton = false;
+        this.isHoveringContactButton = false;
+        
         // 게임 무결성 검증 (개발자 도구 감지 제거)
         this.gameIntegrity = {
             startTime: 0,
@@ -177,6 +182,16 @@ class Game {
                     leaderboardManager.openLeaderboard();
                     return;
                 }
+                
+                // 문의 버튼 클릭 처리 추가
+                const contactButtonX = this.canvas.width / 2 - 100;
+                const contactButtonY = this.canvas.height / 2 + 105;
+                
+                if (x >= contactButtonX && x <= contactButtonX + buttonWidth &&
+                    y >= contactButtonY && y <= contactButtonY + buttonHeight) {
+                    this.openContactMail();
+                    return;
+                }
             }
         });
         
@@ -201,10 +216,18 @@ class Game {
                 const isHoveringLeaderboard = (x >= leaderboardButtonX && x <= leaderboardButtonX + buttonWidth &&
                     y >= leaderboardButtonY && y <= leaderboardButtonY + buttonHeight);
                 
+                // 문의 버튼 호버 감지 추가
+                const contactButtonX = this.canvas.width / 2 - 100;
+                const contactButtonY = this.canvas.height / 2 + 105;
+                
+                const isHoveringContact = (x >= contactButtonX && x <= contactButtonX + buttonWidth &&
+                    y >= contactButtonY && y <= contactButtonY + buttonHeight);
+                
                 this.isHoveringStartButton = isHoveringStart;
                 this.isHoveringLeaderboardButton = isHoveringLeaderboard;
+                this.isHoveringContactButton = isHoveringContact;
                 
-                this.canvas.style.cursor = (isHoveringStart || isHoveringLeaderboard) ? 'pointer' : 'default';
+                this.canvas.style.cursor = (isHoveringStart || isHoveringLeaderboard || isHoveringContact) ? 'pointer' : 'default';
             } else {
                 this.canvas.style.cursor = 'default';
             }
@@ -269,6 +292,60 @@ class Game {
             case 'ArrowRight':
                 this.player.move(reversed ? -1 : 1, 0);
                 break;
+        }
+    }
+    
+    // 문의 메일 열기 함수 추가
+    openContactMail() {
+        console.log('문의 버튼 클릭됨'); // 디버깅용 로그
+        
+        const subject = encodeURIComponent('AvoiderIo 게임 문의 (AvoiderIo Game Inquiry)');
+        const body = encodeURIComponent(`안녕하세요, AvoiderIo 게임에 대해 문의드립니다.
+
+Hello, I have an inquiry about the AvoiderIo game.
+
+---
+게임 URL (Game URL): ${window.location.href}
+브라우저 (Browser): ${navigator.userAgent}
+문의 내용 (Inquiry):
+
+`);
+        
+        const mailtoLink = `mailto:cstv110301@gmail.com?subject=${subject}&body=${body}`;
+        
+        try {
+            window.location.href = mailtoLink;
+            
+            // Analytics: 문의 버튼 클릭 추적
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'contact_click', {
+                    event_category: 'engagement',
+                    event_label: 'contact_email_opened'
+                });
+            }
+        } catch (error) {
+            console.error('메일 클라이언트 열기 실패:', error);
+            
+            // 대체 방법: 메일 주소 복사 알림
+            const fallbackMessage = `메일 클라이언트를 열 수 없습니다.
+아래 이메일로 직접 문의해주세요:
+
+cstv110301@gmail.com
+
+(이메일 주소가 클립보드에 복사됩니다)`;
+            
+            if (confirm(fallbackMessage)) {
+                // 클립보드에 이메일 주소 복사 시도
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText('cstv110301@gmail.com').then(() => {
+                        alert('이메일 주소가 클립보드에 복사되었습니다!');
+                    }).catch(() => {
+                        alert('클립보드 복사에 실패했습니다. 수동으로 복사해주세요: cstv110301@gmail.com');
+                    });
+                } else {
+                    alert('이메일 주소: cstv110301@gmail.com');
+                }
+            }
         }
     }
     
@@ -718,10 +795,11 @@ class Game {
     drawStartScreen() {
         const isDarkMode = !document.body.classList.contains('light-mode');
         
-        this.ctx.font = 'bold 60px "Courier New", monospace';
+        // AVOIDER IO 타이틀 - 픽셀 폰트로 변경하고 공백 추가
+        this.ctx.font = 'bold 60px "Courier New", Monaco, monospace';
         this.ctx.textAlign = 'center';
         this.ctx.fillStyle = isDarkMode ? '#ffffff' : '#333333';
-        this.ctx.fillText('AVOIDERIO', this.canvas.width / 2, this.canvas.height / 2 - 120);
+        this.ctx.fillText('AVOIDER IO', this.canvas.width / 2, this.canvas.height / 2 - 120);
         
         const startButtonX = this.canvas.width / 2 - 100;
         const startButtonY = this.canvas.height / 2 - 25;
@@ -734,6 +812,12 @@ class Game {
         const leaderboardButtonY = this.canvas.height / 2 + 40;
         
         this.drawButton(leaderboardButtonX, leaderboardButtonY, buttonWidth, buttonHeight, 'LEADERBOARD', this.isHoveringLeaderboardButton, isDarkMode);
+        
+        // 문의 버튼 추가
+        const contactButtonX = this.canvas.width / 2 - 100;
+        const contactButtonY = this.canvas.height / 2 + 105;
+        
+        this.drawButton(contactButtonX, contactButtonY, buttonWidth, buttonHeight, 'CONTACT', this.isHoveringContactButton, isDarkMode);
     }
     
     drawButton(x, y, width, height, text, isHovering, isDarkMode) {

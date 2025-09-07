@@ -232,15 +232,23 @@ class LeaderboardManager {
             return { valid: false, reason: `최소 ${this.minValidScore}점 이상이어야 합니다 (Minimum ${this.minValidScore} points required)` };
         }
 
-        // CONFIG 안전 확인
+        // CONFIG 안전 확인 및 expectedMinTime 계산
         const levelDuration = (typeof CONFIG !== 'undefined' && CONFIG.GAMEPLAY && CONFIG.GAMEPLAY.LEVEL_DURATION) 
             ? CONFIG.GAMEPLAY.LEVEL_DURATION / 1000 
             : 5; // 기본값 5초
+
+        // expectedMinTime 변수 정의
+        const expectedMinTime = (level - 1) * levelDuration * 0.8; // 레벨 달성에 필요한 최소 시간 (20% 여유)
 
         if (gameTime < expectedMinTime && level > 5) {
             console.warn(`시간 부족 (Insufficient time): Level ${level}에 ${gameTime}초 (최소: ${expectedMinTime}초)`);
             return { valid: false, reason: `레벨 ${level}에 도달하기에는 시간이 부족합니다 (Insufficient time to reach level ${level})` };
         }
+
+        // maxReasonableScore 계산
+        const baseScorePerSecond = 5; // 기본 점수/초
+        const levelMultiplier = Math.floor(level / 2) + 1; // 레벨 배율
+        const maxReasonableScore = gameTime * baseScorePerSecond * levelMultiplier * 3; // 3배 여유
 
         if (score > maxReasonableScore && score > 50000) {
             console.warn(`점수 과다 (Excessive score): ${score}점 (합리적 최대: ${maxReasonableScore}점)`);

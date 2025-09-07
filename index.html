@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AvoiderIo - 무료 온라인 피하기 게임 (Free Online Dodge Game)</title>
     
+    <!-- Google AdSense (나중에 승인 후 ca-pub 코드 교체) -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+    
     <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
@@ -71,6 +74,15 @@
                 event_label: enabled ? 'sound_on' : 'sound_off'
             });
         }
+        
+        // AdSense 수익 추적 함수 (나중에 사용)
+        function trackAdInteraction(adSlot) {
+            gtag('event', 'ad_interaction', {
+                event_category: 'ads',
+                event_label: adSlot,
+                value: 1
+            });
+        }
     </script>
     
     <!-- SEO Meta Tags -->
@@ -94,10 +106,14 @@
     <meta property="og:locale:alternate" content="en_US">
     
     <!-- Google Search Console -->
-    <!-- <meta name="google-site-verification" content="여기에_받은_코드_입력" /> -->
+    <meta name="google-site-verification" content="google2fe8b00d0ede64f6" />
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://avoiderio.xyz">
+    
+    <!-- 정책 페이지 링크 (AdSense 필수) -->
+    <link rel="privacy-policy" href="https://avoiderio.xyz/privacy-policy.html">
+    <link rel="terms-of-service" href="https://avoiderio.xyz/terms-of-service.html">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -123,93 +139,172 @@
         ⚠️ 비정상적인 활동이 감지되었습니다. 공정한 플레이를 위해 협조해주세요. (Unusual activity detected. Please cooperate for fair play.)
     </div>
     
-    <!-- Game Container -->
-    <div class="game-container" id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600" 
-                aria-label="AvoiderIo 게임 화면 (AvoiderIo Game Screen)"
-                role="img">
-            이 브라우저는 Canvas를 지원하지 않습니다. 최신 브라우저를 사용해주세요. (This browser does not support Canvas. Please use a modern browser.)
-        </canvas>
+    <!-- Main Container with Ad Support -->
+    <div class="main-container">
+        <!-- 상단 배너 광고 영역 (AdSense 승인 후 활성화) -->
+        <!--
+        <div class="ad-container top-banner">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="1234567890"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+        -->
         
-        <!-- Pause Overlay -->
-        <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-labelledby="pauseTitle" aria-hidden="true">
-            <div class="pause-menu">
-                <h2 id="pauseTitle" class="pause-title">일시정지 (PAUSED)</h2>
-                <button class="pixel-button" onclick="resumeGame()" aria-label="게임 계속하기 (Continue Game)">
-                    계속하기 (CONTINUE)
-                </button>
-                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
-                    메인 메뉴 (MAIN MENU)
-                </button>
+        <!-- Game Container (기존 레이아웃 유지) -->
+        <div class="game-container" id="gameContainer">
+            <canvas id="gameCanvas" width="800" height="600" 
+                    aria-label="AvoiderIo 게임 화면 (AvoiderIo Game Screen)"
+                    role="img">
+                이 브라우저는 Canvas를 지원하지 않습니다. 최신 브라우저를 사용해주세요. (This browser does not support Canvas. Please use a modern browser.)
+            </canvas>
+            
+            <!-- 게임 오버 시 표시되는 중간 광고 (AdSense 승인 후 활성화) -->
+            <!--
+            <div class="interstitial-ad" id="gameOverAd" style="display:none;">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                     data-ad-slot="1122334455"
+                     data-ad-format="rectangle"
+                     data-full-width-responsive="true"></ins>
             </div>
+            -->
         </div>
         
-        <!-- Game Over Overlay -->
-        <div class="game-over-overlay" id="gameOverOverlay" role="dialog" aria-labelledby="gameOverTitle" aria-hidden="true">
-            <div class="game-over-menu">
-                <h2 id="gameOverTitle" class="game-over-title">게임 오버 (GAME OVER)</h2>
-                <div class="final-score-display" aria-label="최종 점수 (Final Score)">
-                    <span id="finalScore">0</span>
-                </div>
-                <div class="stats" role="group" aria-label="게임 통계 (Game Statistics)">
-                    <p>레벨 (Level): <span id="finalLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
-                    <p>생존 시간 (Survival Time): <span id="finalTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
-                </div>
-                <button class="pixel-button" onclick="startGame()" aria-label="게임 다시 시작 (Restart Game)">
-                    다시 시도 (RETRY)
-                </button>
-                <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
-                    메인 메뉴 (MAIN MENU)
-                </button>
+        <!-- 사이드바 광고들 (AdSense 승인 후 활성화, 절대 위치로 배치) -->
+        <!--
+        <div class="ad-sidebar left-sidebar">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="0987654321"
+                 data-ad-format="vertical"
+                 data-full-width-responsive="false"></ins>
+        </div>
+        
+        <div class="ad-sidebar right-sidebar">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="5566778899"
+                 data-ad-format="vertical"
+                 data-full-width-responsive="false"></ins>
+        </div>
+        -->
+        
+        <!-- 하단 배너 광고 (AdSense 승인 후 활성화) -->
+        <!--
+        <div class="ad-container bottom-banner">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="9988776655"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+        </div>
+        -->
+        
+        <!-- 모바일 전용 네이티브 광고 (AdSense 승인 후 활성화) -->
+        <!--
+        <div class="mobile-native-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-format="fluid"
+                 data-ad-layout-key="-6t+ed+2i-1n-4w"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="4433221100"></ins>
+        </div>
+        -->
+        
+        <!-- 정책 링크 (AdSense 필수) -->
+        <div class="policy-links">
+            <a href="/privacy-policy.html">개인정보처리방침</a> | 
+            <a href="/terms-of-service.html">이용약관</a> | 
+            <a href="mailto:support@avoiderio.xyz">문의하기</a>
+        </div>
+    </div>
+        
+    <!-- Pause Overlay -->
+    <div class="pause-overlay" id="pauseOverlay" role="dialog" aria-labelledby="pauseTitle" aria-hidden="true">
+        <div class="pause-menu">
+            <h2 id="pauseTitle" class="pause-title">일시정지 (PAUSED)</h2>
+            <button class="pixel-button" onclick="resumeGame()" aria-label="게임 계속하기 (Continue Game)">
+                계속하기 (CONTINUE)
+            </button>
+            <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
+                메인 메뉴 (MAIN MENU)
+            </button>
+        </div>
+    </div>
+    
+    <!-- Game Over Overlay -->
+    <div class="game-over-overlay" id="gameOverOverlay" role="dialog" aria-labelledby="gameOverTitle" aria-hidden="true">
+        <div class="game-over-menu">
+            <h2 id="gameOverTitle" class="game-over-title">게임 오버 (GAME OVER)</h2>
+            <div class="final-score-display" aria-label="최종 점수 (Final Score)">
+                <span id="finalScore">0</span>
             </div>
-        </div>
-        
-        <!-- Leaderboard Overlay -->
-        <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
-            <div class="leaderboard-menu">
-                <h2 id="leaderboardTitle" class="leaderboard-title">순위표 (LEADERBOARD)</h2>
-                <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표 (Rankings)">
-                    <!-- Leaderboard entries will be added here dynamically -->
-                </div>
-                <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기 (Close Leaderboard)">
-                    닫기 (CLOSE)
-                </button>
+            <div class="stats" role="group" aria-label="게임 통계 (Game Statistics)">
+                <p>레벨 (Level): <span id="finalLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
+                <p>생존 시간 (Survival Time): <span id="finalTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
             </div>
+            <button class="pixel-button" onclick="startGame()" aria-label="게임 다시 시작 (Restart Game)">
+                다시 시도 (RETRY)
+            </button>
+            <button class="pixel-button" onclick="goToMainMenu()" aria-label="메인 메뉴로 이동 (Go to Main Menu)">
+                메인 메뉴 (MAIN MENU)
+            </button>
         </div>
-        
-        <!-- Name Input Overlay -->
-        <div class="name-input-overlay" id="nameInputOverlay" role="dialog" aria-labelledby="nameInputTitle" aria-hidden="true">
-            <div class="name-input-menu">
-                <h2 id="nameInputTitle" class="name-input-title">신기록! (NEW RECORD!)</h2>
-                <p class="record-message">축하합니다! 새로운 기록을 달성했습니다! (Congratulations! You achieved a new record!)</p>
-                <div class="record-stats" role="group" aria-label="달성한 기록 (Achieved Record)">
-                    <p>점수 (Score): <span id="recordScore" aria-label="달성한 점수 (Achieved Score)">0</span></p>
-                    <p>레벨 (Level): <span id="recordLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
-                    <p>생존 시간 (Survival Time): <span id="recordTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
-                </div>
-                <div class="name-input-container">
-                    <label for="playerName">이름을 입력하세요 (Enter your name):</label>
-                    <input type="text" 
-                           id="playerName" 
-                           maxlength="15" 
-                           placeholder="플레이어 (Player)"
-                           autocomplete="off"
-                           spellcheck="false"
-                           aria-label="플레이어 이름 입력 (Enter Player Name)">
-                </div>
-                <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록 (Submit Record)">
-                    등록 (SUBMIT)
-                </button>
-                <button class="pixel-button secondary" onclick="skipRecord()" aria-label="기록 등록 건너뛰기 (Skip Record Registration)">
-                    건너뛰기 (SKIP)
-                </button>
+    </div>
+    
+    <!-- Leaderboard Overlay -->
+    <div class="leaderboard-overlay" id="leaderboardOverlay" role="dialog" aria-labelledby="leaderboardTitle" aria-hidden="true">
+        <div class="leaderboard-menu">
+            <h2 id="leaderboardTitle" class="leaderboard-title">순위표 (LEADERBOARD)</h2>
+            <div class="leaderboard-list" id="leaderboardList" role="list" aria-label="순위표 (Rankings)">
+                <!-- Leaderboard entries will be added here dynamically -->
             </div>
+            <button class="pixel-button" onclick="closeLeaderboard()" aria-label="리더보드 닫기 (Close Leaderboard)">
+                닫기 (CLOSE)
+            </button>
         </div>
-        
-        <!-- Bottom Controls -->
-        <div class="bottom-controls" role="complementary" aria-label="게임 조작법 (Game Controls)">
-            <kbd>WASD</kbd>/<kbd>방향키 (Arrow Keys)</kbd>: 이동 (Move) | <kbd>ESC</kbd>: 일시정지 (Pause) | <kbd>Space</kbd>: 게임 시작 (Start Game)
+    </div>
+    
+    <!-- Name Input Overlay -->
+    <div class="name-input-overlay" id="nameInputOverlay" role="dialog" aria-labelledby="nameInputTitle" aria-hidden="true">
+        <div class="name-input-menu">
+            <h2 id="nameInputTitle" class="name-input-title">신기록! (NEW RECORD!)</h2>
+            <p class="record-message">축하합니다! 새로운 기록을 달성했습니다! (Congratulations! You achieved a new record!)</p>
+            <div class="record-stats" role="group" aria-label="달성한 기록 (Achieved Record)">
+                <p>점수 (Score): <span id="recordScore" aria-label="달성한 점수 (Achieved Score)">0</span></p>
+                <p>레벨 (Level): <span id="recordLevel" aria-label="도달한 레벨 (Reached Level)">1</span></p>
+                <p>생존 시간 (Survival Time): <span id="recordTime" aria-label="생존한 시간 (Survived Time)">0</span>초 (sec)</p>
+            </div>
+            <div class="name-input-container">
+                <label for="playerName">이름을 입력하세요 (Enter your name):</label>
+                <input type="text" 
+                       id="playerName" 
+                       maxlength="15" 
+                       placeholder="플레이어 (Player)"
+                       autocomplete="off"
+                       spellcheck="false"
+                       aria-label="플레이어 이름 입력 (Enter Player Name)">
+            </div>
+            <button class="pixel-button" onclick="submitRecord()" aria-label="기록 등록 (Submit Record)">
+                등록 (SUBMIT)
+            </button>
+            <button class="pixel-button secondary" onclick="skipRecord()" aria-label="기록 등록 건너뛰기 (Skip Record Registration)">
+                건너뛰기 (SKIP)
+            </button>
         </div>
+    </div>
+    
+    <!-- Bottom Controls -->
+    <div class="bottom-controls" role="complementary" aria-label="게임 조작법 (Game Controls)">
+        <kbd>WASD</kbd>/<kbd>방향키 (Arrow Keys)</kbd>: 이동 (Move) | <kbd>ESC</kbd>: 일시정지 (Pause) | <kbd>Space</kbd>: 게임 시작 (Start Game)
     </div>
 
     <!-- Hidden Accessibility Info -->
@@ -230,6 +325,47 @@
     <script src="player.js"></script>
     <script src="game.js"></script>
     <script src="main.js"></script>
+    
+    <!-- AdSense 초기화 스크립트 (승인 후 주석 해제) -->
+    <!--
+    <script>
+        // 페이지 로드 후 광고 로드
+        window.addEventListener('load', function() {
+            // 기본 광고들 활성화 (승인 후 주석 해제)
+            // (adsbygoogle = window.adsbygoogle || []).push({});
+        });
+        
+        // 게임 오버 시 광고 표시
+        function showGameOverAd() {
+            const gameOverAd = document.getElementById('gameOverAd');
+            if (gameOverAd) {
+                gameOverAd.style.display = 'block';
+                
+                // 새 광고 로드
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                
+                // 광고 상호작용 추적
+                trackAdInteraction('gameover_interstitial');
+                
+                // 5초 후 자동으로 숨김
+                setTimeout(() => {
+                    gameOverAd.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // 고득점 달성 시 보상형 광고 (선택사항)
+        function showRewardAd() {
+            const reward = confirm('광고를 시청하면 추가 생명을 얻을 수 있습니다. 시청하시겠습니까?');
+            if (reward) {
+                // 보상형 광고 로직
+                trackAdInteraction('reward_ad');
+                return true;
+            }
+            return false;
+        }
+    </script>
+    -->
     
     <!-- Error Handling and Logging -->
     <script>
@@ -258,6 +394,7 @@
         window.addEventListener('load', function() {
             console.log('AvoiderIo 게임이 성공적으로 로드되었습니다. (AvoiderIo game loaded successfully.)');
             console.log('🔧 개발자 도구 제한 없음 (No developer tools restrictions)');
+            console.log('💰 AdSense 준비 완료 - 승인 후 광고 활성화 예정');
             
             if (typeof gtag !== 'undefined') {
                 gtag('event', 'page_view', {
@@ -266,6 +403,7 @@
                 });
             }
             
+            // 오디오 컨텍스트 초기화
             document.addEventListener('click', function initAudio() {
                 if (typeof soundManager !== 'undefined') {
                     try {
@@ -292,6 +430,41 @@
                 });
             }
         });
+    </script>
+    
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "AvoiderIo",
+        "description": "장애물을 피해 최대한 오래 생존하는 무료 온라인 게임",
+        "url": "https://avoiderio.xyz",
+        "genre": ["Action", "Arcade", "Survival"],
+        "playMode": "SinglePlayer",
+        "applicationCategory": "Game",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "KRW"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "AvoiderIo"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "AvoiderIo"
+        },
+        "inLanguage": ["ko", "en"],
+        "isAccessibleForFree": true,
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.5",
+            "ratingCount": "100"
+        }
+    }
     </script>
 </body>
 </html>

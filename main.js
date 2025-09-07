@@ -34,5 +34,18 @@ function showGameOverAfterRecord() {
     }
 }
 
+// 문의 메일 열기 전역 함수 - 가장 간단한 버전
+function openContactMail() {
+    console.log('전역 openContactMail 함수 호출됨'); 
+    
+    if (game && game.openContactMail) {
+        console.log('게임 객체를 통해 메일 열기');
+        game.openContactMail();
+    } else {
+        console.log('게임 객체 없음, 직접 mailto 링크로 이동');
+        window.location.href = 'mailto:cstv110301@gmail.com';
+    }
+}
+
 // 게임 초기화
 window.addEventListener('load', initGame);

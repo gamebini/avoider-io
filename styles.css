@@ -59,6 +59,151 @@ body {
     -moz-user-drag: none;
 }
 
+/* AdSense 광고 준비 스타일 - styles.css에 추가 */
+
+/* 메인 컨테이너 */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 광고 컨테이너 (현재는 숨김, AdSense 승인 후 활성화) */
+.ad-container {
+    width: 100%;
+    text-align: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 5px 0;
+    display: none; /* 승인 후 block으로 변경 */
+    position: relative;
+    z-index: 100;
+}
+
+.ad-sidebar {
+    position: fixed;
+    width: 160px;
+    height: 600px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    display: none; /* 승인 후 block으로 변경 */
+    z-index: 50;
+}
+
+.left-sidebar {
+    left: 20px;
+}
+
+.right-sidebar {
+    right: 20px;
+}
+
+.game-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.interstitial-ad {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border: 3px solid var(--ui-color);
+    border-radius: 10px;
+    z-index: 1001;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: none;
+}
+
+.mobile-native-ad {
+    display: none;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+/* 정책 링크 스타일 */
+.policy-links {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    opacity: 0.7;
+    z-index: 200;
+}
+
+.policy-links a {
+    color: var(--ui-color);
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.policy-links a:hover {
+    text-decoration: underline;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+    .ad-sidebar {
+        display: none !important;
+    }
+    
+    .mobile-native-ad {
+        display: block; /* 모바일에서 네이티브 광고 표시 */
+    }
+}
+
+@media (max-width: 768px) {
+    .ad-container {
+        padding: 5px;
+        margin: 3px 0;
+    }
+    
+    .interstitial-ad {
+        padding: 15px;
+        max-width: 95vw;
+    }
+    
+    .policy-links {
+        font-size: 11px;
+        padding: 10px;
+    }
+}
+
+body.game-playing .policy-links {
+    display: none;
+}
+
+/* 다크 모드 지원 */
+body.light-mode .ad-container {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .ad-sidebar {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .policy-links {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
 .game-container {
     display: flex;
     position: relative;
@@ -66,6 +211,11 @@ body {
     height: 100vh;
     justify-content: center;
     align-items: center;
+}
+
+.game-container:focus-within .bottom-controls {
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
 #gameCanvas {
@@ -78,6 +228,18 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /* 약간의 마진 조정 */
+    margin-bottom: 10px;
+}
+
+a[href^="mailto:"] {
+    color: var(--success-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a[href^="mailto:"]:hover {
+    text-decoration: underline;
 }
 
 .pixel-button {
@@ -321,7 +483,7 @@ body {
 
 .bottom-controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 40px; /* 기존 20px에서 40px로 변경 */
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
