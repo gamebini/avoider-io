@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvoiderIo 사이트맵 진단 도구 (로컬용)</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status { 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 8px; 
+            border-left: 5px solid;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border-left-color: #28a745;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border-left-color: #dc3545;
+        }
+        .warning { 
+            background: #fff3cd; 
+            color: #856404; 
+            border-left-color: #ffc107;
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border-left-color: #17a2b8;
+        }
+        button { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            overflow-x: auto; 
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .result { margin: 10px 0; }
+        .input-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .quick-links {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .quick-links a {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .quick-links a:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 AvoiderIo 사이트맵 진단 도구</h1>
+        <p>로컬 환경에서 실행되는 진단 도구입니다. CORS 제한을 우회하는 대안 방법을 제공합니다.</p>
+        
+        <div class="input-group">
+            <label for="sitemapUrl">사이트맵 URL:</label>
+            <input type="text" id="sitemapUrl" value="https://avoiderio.xyz/sitemap.xml" placeholder="진단할 사이트맵 URL 입력">
+            <button onclick="runDiagnostics()" id="runBtn">진단 시작</button>
+            <button onclick="clearResults()">결과 지우기</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('auto')">자동 진단</div>
+            <div class="tab" onclick="switchTab('manual')">수동 확인</div>
+            <div class="tab" onclick="switchTab('tools')">외부 도구</div>
+        </div>
+
+        <div id="auto" class="tab-content active">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>진단 중입니다...</p>
+            </div>
+            <div id="results"></div>
+        </div>
+
+        <div id="manual" class="tab-content">
+            <div class="info status">
+                <h3>🔧 수동 확인 방법</h3>
+                <h4>1. 브라우저에서 직접 확인:</h4>
+                <ul>
+                    <li><strong>사이트맵 접속:</strong> <a href="https://avoiderio.xyz/sitemap.xml" target="_blank">https://avoiderio.xyz/sitemap.xml</a></li>
+                    <li><strong>robots.txt 확인:</strong> <a href="https://avoiderio.xyz/robots.txt" target="_blank">https://avoiderio.xyz/robots.txt</a></li>
+                    <li><strong>메인 페이지:</strong> <a href="https://avoiderio.xyz/" target="_blank">https://avoiderio.xyz/</a></li>
+                </ul>
+                
+                <h4>2. 개발자 도구 Network 탭 확인:</h4>
+                <ol>
+                    <li>F12 키를 눌러 개발자 도구 열기</li>
+                    <li>Network 탭 선택</li>
+                    <li>사이트맵 URL 접속</li>
+                    <li>응답 헤더와 상태 코드 확인</li>
+                </ol>
+
+                <h4>3. 명령어로 확인 (터미널/cmd):</h4>
+                <pre>
+# 헤더 정보 확인
+curl -I https://avoiderio.xyz/sitemap.xml
+
+# 내용 확인
+curl https://avoiderio.xyz/sitemap.xml
+
+# DNS 확인
+nslookup avoiderio.xyz
+                </pre>
+            </div>
+        </div>
+
+        <div id="tools" class="tab-content">
+            <div class="quick-links">
+                <h3>🛠️ 외부 검증 도구들</h3>
+                
+                <h4>Google 도구:</h4>
+                <a href="https://www.google.com/ping?sitemap=https://avoiderio.xyz/sitemap.xml" target="_blank">
+                    📤 Google 사이트맵 핑
+                </a>
+                <a href="https://search.google.com/search-console" target="_blank">
+                    🔍 Search Console
+                </a>
+                <a href="https://search.google.com/test/rich-results?url=https://avoiderio.xyz" target="_blank">
+                    📊 리치 결과 테스트
+                </a>
+
+                <h4>사이트맵 검증 도구:</h4>
+                <a href="https://www.xml-sitemaps.com/validate-xml-sitemap.html" target="_blank">
+                    ✅ XML Sitemaps 검증
+                </a>
+                <a href="https://websiteseochecker.com/xml-sitemap-validator/" target="_blank">
+                    🔍 SEO Checker
+                </a>
+                <a href="https://smallseotools.com/xml-sitemap-validator/" target="_blank">
+                    📋 Small SEO Tools
+                </a>
+
+                <h4>SEO 분석 도구:</h4>
+                <a href="https://pagespeed.web.dev/?url=https://avoiderio.xyz" target="_blank">
+                    ⚡ PageSpeed Insights
+                </a>
+                <a href="https://validator.w3.org/nu/?doc=https://avoiderio.xyz" target="_blank">
+                    📝 HTML 검증
+                </a>
+                <a href="https://validator.w3.org/feed/check.cgi?url=https://avoiderio.xyz/sitemap.xml" target="_blank">
+                    🔧 W3C Feed 검증
+                </a>
+
+                <h4>DNS/네트워크 도구:</h4>
+                <a href="https://dnschecker.org/#A/avoiderio.xyz" target="_blank">
+                    🌐 DNS 전파 확인
+                </a>
+                <a href="https://www.whatsmydns.net/#A/avoiderio.xyz" target="_blank">
+                    📡 DNS 조회
+                </a>
+                <a href="https://httpstatus.io/?url=https://avoiderio.xyz/sitemap.xml" target="_blank">
+                    📊 HTTP 상태 확인
+                </a>
+            </div>
+
+            <div class="warning status">
+                <h4>⏰ 일반적인 처리 시간:</h4>
+                <ul>
+                    <li><strong>GitHub Pages 빌드:</strong> 5-10분</li>
+                    <li><strong>CDN 캐시 갱신:</strong> 1-24시간</li>
+                    <li><strong>Google 첫 크롤링:</strong> 24-72시간</li>
+                    <li><strong>Search Console 반영:</strong> 1-7일</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        async function runDiagnostics() {
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            const runBtn = document.getElementById('runBtn');
+            const sitemapUrl = document.getElementById('sitemapUrl').value;
+            
+            // UI 상태 변경
+            loadingDiv.style.display = 'block';
+            runBtn.disabled = true;
+            resultsDiv.innerHTML = '';
+            
+            const results = [];
+            
+            // 기본 정보 표시
+            results.push({
+                test: '진단 대상',
+                status: 'info',
+                message: `URL: ${sitemapUrl}<br>시간: ${new Date().toLocaleString()}`
+            });
+
+            try {
+                // 1. 기본 fetch 시도 (CORS 제한으로 실패할 가능성 높음)
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 타임아웃
+                    
+                    const response = await fetch(sitemapUrl, {
+                        method: 'HEAD',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        signal: controller.signal,
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    results.push({
+                        test: '사이트맵 접근성',
+                        status: response.ok ? 'success' : 'error',
+                        message: response.ok ? 
+                            `✅ 접근 가능 (상태: ${response.status})` : 
+                            `❌ 접근 불가 (상태: ${response.status})`
+                    });
+                    
+                    // Content-Type 확인
+                    const contentType = response.headers.get('content-type');
+                    results.push({
+                        test: 'Content-Type',
+                        status: contentType && (contentType.includes('xml') || contentType.includes('text')) ? 'success' : 'warning',
+                        message: `Content-Type: ${contentType || '없음'}`
+                    });
+                    
+                } catch (fetchError) {
+                    if (fetchError.name === 'AbortError') {
+                        results.push({
+                            test: '사이트맵 접근성',
+                            status: 'error',
+                            message: '❌ 요청 시간 초과 (10초)'
+                        });
+                    } else {
+                        results.push({
+                            test: '사이트맵 접근성 (CORS 제한)',
+                            status: 'warning',
+                            message: `⚠️ CORS 정책으로 인해 직접 접근 불가: ${fetchError.message}<br>
+                                     <strong>해결방법:</strong> 브라우저에서 직접 <a href="${sitemapUrl}" target="_blank">${sitemapUrl}</a> 접속하여 확인`
+                        });
+                    }
+                }
+
+                // 2. 대안 확인 방법들
+                results.push({
+                    test: '수동 확인 방법',
+                    status: 'info',
+                    message: `
+                        <strong>다음 방법들로 확인하세요:</strong><br>
+                        1. <a href="${sitemapUrl}" target="_blank">새 탭에서 사이트맵 직접 열기</a><br>
+                        2. <a href="${sitemapUrl.replace('/sitemap.xml', '/robots.txt')}" target="_blank">robots.txt 확인</a><br>
+                        3. <a href="https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}" target="_blank">Google에 사이트맵 핑 보내기</a>
+                    `
+                });
+
+                // 3. 일반적인 문제 해결 방법
+                results.push({
+                    test: '문제 해결 체크리스트',
+                    status: 'info',
+                    message: `
+                        <strong>다음 사항들을 확인해보세요:</strong><br>
+                        ✅ GitHub Pages 빌드 완료 (저장소 Actions 탭 확인)<br>
+                        ✅ 사이트맵이 브라우저에서 정상 표시되는가?<br>
+                        ✅ Search Console에서 이전 사이트맵 삭제했는가?<br>
+                        ✅ 24-72시간 충분히 기다렸는가?<br>
+                        ✅ HTTPS로 접속하고 있는가? (HTTP 아님)<br>
+                        ✅ robots.txt에 사이트맵 참조가 있는가?
+                    `
+                });
+
+                // 4. 시간 관련 정보
+                results.push({
+                    test: '예상 처리 시간',
+                    status: 'warning',
+                    message: `
+                        <strong>⏰ 일반적인 처리 시간:</strong><br>
+                        • GitHub Pages 빌드: 5-10분<br>
+                        • CDN 캐시 갱신: 1-24시간<br>
+                        • Google 첫 크롤링: 24-72시간<br>
+                        • Search Console 반영: 1-7일<br><br>
+                        <strong>💡 대부분 시간 문제입니다!</strong> 특히 새 도메인의 경우 더 오래 걸릴 수 있습니다.
+                    `
+                });
+
+                // 5. 추가 팁
+                results.push({
+                    test: '추가 개선 방법',
+                    status: 'success',
+                    message: `
+                        <strong>🚀 추가로 할 수 있는 것들:</strong><br>
+                        • Search Console에서 개별 URL 인덱스 요청<br>
+                        • Google Analytics 설치로 트래픽 신호 보내기<br>
+                        • 다른 사이트에서 백링크 생성<br>
+                        • 정기적인 콘텐츠 업데이트<br>
+                        • 소셜미디어에서 링크 공유
+                    `
+                });
+
+            } catch (error) {
+                results.push({
+                    test: '전체 진단',
+                    status: 'error',
+                    message: `❌ 진단 중 오류 발생: ${error.message}`
+                });
+            }
+            
+            // 결과 표시
+            displayResults(results);
+            
+            // UI 상태 복원
+            loadingDiv.style.display = 'none';
+            runBtn.disabled = false;
+        }
+        
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `result status ${result.status}`;
+                div.innerHTML = `
+                    <strong>${result.test}:</strong><br>
+                    ${result.message}
+                `;
+                resultsDiv.appendChild(div);
+            });
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // 페이지 로드 시 환경 안내
+        window.addEventListener('load', () => {
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.className = 'result status info';
+            welcomeMsg.innerHTML = `
+                <strong>💻 로컬 환경에서 실행 중</strong><br>
+                CORS 정책으로 인해 일부 자동 검사가 제한될 수 있습니다.<br>
+                "수동 확인" 및 "외부 도구" 탭을 적극 활용해주세요!
+            `;
+            document.getElementById('results').appendChild(welcomeMsg);
+        });
+    </script>
+</body>
+</html>

@@ -1,11 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
 Sitemap: https://avoiderio.xyz/sitemap.xml
-
-# Block access to specific files
-Disallow: /*.js$
-Disallow: /*.css$
-Disallow: /CNAME
-Disallow: /google*.html
