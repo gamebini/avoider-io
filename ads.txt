@@ -1,0 +1,18 @@
+# ads.txt file for avoiderio.xyz
+# This file ensures ad inventory authenticity
+
+# Google AdSense
+google.com, pub-8384351699458272, DIRECT, f08c47fec0942fa0
+
+# 추가 광고 네트워크 (선택사항)
+# google.com, pub-8384351699458272, DIRECT, f08c47fec0942fa0  # 추가 AdSense 계정
+# googlesyndication.com, pub-8384351699458272, DIRECT, f08c47fec0942fa0  # Google Ad Manager
+
+# 기타 광고 네트워크 (나중에 추가 가능)
+# amazon-adsystem.com, 1234-5678-9012, DIRECT
+# media.net, 8CU12345, DIRECT
+# pubmatic.com, 123456, RESELLER, 5d62403b186f2ace
+# rubiconproject.com, 12345, RESELLER, 0bfd66d529a55807
+
+# 연락처 정보
+# contact=ads@avoiderio.xyz
