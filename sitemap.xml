@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://avoiderio.xyz/</loc>
-        <lastmod>2024-12-19</lastmod>
+        <lastmod>2024-12-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
-        <xhtml:link rel="alternate" hreflang="ko" href="https://avoiderio.xyz/" />
-        <xhtml:link rel="alternate" hreflang="en" href="https://avoiderio.xyz/" />
-        <xhtml:link rel="alternate" hreflang="x-default" href="https://avoiderio.xyz/" />
+    </url>
+    <url>
+        <loc>https://avoiderio.xyz/privacy-policy.html</loc>
+        <lastmod>2024-12-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://avoiderio.xyz/terms-of-service.html</loc>
+        <lastmod>2024-12-19</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
     </url>
 </urlset>
