@@ -1,38 +1,13 @@
-# GitHub Pages 설정
 plugins:
-  - jekyll-sitemap
+  # - jekyll-sitemap   # 👉 수동 sitemap.xml 사용 시 주석 처리
 
-# 사이트 기본 정보
-title: "AvoiderIo - Free Online Dodge Game"
-description: "장애물을 피해 최대한 오래 생존하는 무료 온라인 게임"
-url: "https://avoiderio.xyz"
-baseurl: ""
-
-# SEO 설정
-lang: ko
-
-# Jekyll 설정
-markdown: kramdown
-highlighter: rouge
-permalink: pretty
-
-# 제외할 파일
 exclude:
   - README.md
   - LICENSE
   - .gitignore
   - .git/
 
-# 포함할 파일
 include:
   - _pages
-  - .htaccess
   - robots.txt
   - sitemap.xml
-
-# MIME 타입 설정
-defaults:
-  - scope:
-      path: "*.xml"
-    values:
-      sitemap: false
